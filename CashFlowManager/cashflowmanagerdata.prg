@@ -1,0 +1,243 @@
+*===========================================================
+*  Autor: Nicolas
+*  Proyecto: Flujo de Caja INTECPLAST
+*  Descripción:
+*  Generador de Flujo de Caja semanal con TRM.
+*  Incluye manejo de errores avanzado.
+*===========================================================
+
+PUBLIC gnConnSQL
+
+
+
+*-----------------------------------------------------------
+* FUNCIÓN PRINCIPAL
+*-----------------------------------------------------------
+FUNCTION GenerarCashFlowExcel
+    LPARAMETERS tdFechaFinal, tnSemanasAtras, tnSemanasAdelante
+
+    LOCAL loExcel, loLibro, loHojaUSD
+    LOCAL ldFechaBase
+    LOCAL lcErrorDetalle
+
+    *==============================
+    * VALIDACIÓN DE PARÁMETROS
+    *==============================
+    IF PCOUNT() < 3
+        MESSAGEBOX("Debe enviar 3 parámetros: Fecha, SemanasAtras, SemanasAdelante",16,"Error")
+        RETURN .F.
+    ENDIF
+
+    IF EMPTY(tdFechaFinal)
+        MESSAGEBOX("Fecha inválida.",16,"Error")
+        RETURN .F.
+    ENDIF
+
+    TRY
+
+        * Ajustar fecha al lunes
+        ldFechaBase = tdFechaFinal - (DOW(tdFechaFinal,2) - 1)
+
+        * Crear Excel
+        loExcel = CREATEOBJECT("Excel.Application")
+        loExcel.Visible = .T.
+        loLibro = loExcel.Workbooks.Add
+
+        *===========================================
+        * HOJA 1 ? USD (usar hoja inicial)
+        *===========================================
+        loHojaUSD = loLibro.Sheets(1)
+        loHojaUSD.Name = "CF I Q-AJUSTADO USD"
+
+        FormatearHojaBase(loHojaUSD)
+
+        ArmarEncabezadoCashFlow(loHojaUSD, "USD", ;
+                                tdFechaFinal, ldFechaBase, ;
+                                tnSemanasAtras, tnSemanasAdelante)
+
+        ArmarDataCashFlow(loHojaUSD, "USD")
+
+
+        *===========================================
+        * HOJA 2 ? COP
+        *===========================================
+        CrearHojaCashFlow(loLibro, "COP", ;
+                          tdFechaFinal, ldFechaBase, ;
+                          tnSemanasAtras, tnSemanasAdelante)
+
+    CATCH TO loError
+
+        lcErrorDetalle = ;
+            "ERROR GENERANDO EXCEL" + CHR(13)+CHR(10)+CHR(13)+CHR(10) + ;
+            "Mensaje: " + loError.Message + CHR(13)+CHR(10) + ;
+            "Error No: " + TRANSFORM(loError.ErrorNo) + CHR(13)+CHR(10) + ;
+            "Procedimiento: " + loError.Procedure + CHR(13)+CHR(10) + ;
+            "Línea: " + TRANSFORM(loError.LineNo)
+
+        MESSAGEBOX(lcErrorDetalle,16,"Error Fatal")
+
+    ENDTRY
+    
+    RETURN .T.
+
+ENDFUNC
+
+
+
+*-----------------------------------------------------------
+* CREA HOJA ADICIONAL
+*-----------------------------------------------------------
+FUNCTION CrearHojaCashFlow
+    LPARAMETERS loLibro, tcMoneda, ;
+                tdFechaFinal, ldFechaBase, ;
+                tnSemanasAtras, tnSemanasAdelante
+
+    LOCAL loHoja
+
+    loHoja = loLibro.Sheets.Add(, loLibro.Sheets(loLibro.Sheets.Count))
+    loHoja.Name = "CF I Q-AJUSTADO " + tcMoneda
+
+    FormatearHojaBase(loHoja)
+
+    ArmarEncabezadoCashFlow(loHoja, tcMoneda, ;
+                            tdFechaFinal, ldFechaBase, ;
+                            tnSemanasAtras, tnSemanasAdelante)
+
+    ArmarDataCashFlow(loHoja, tcMoneda)
+
+ENDFUNC
+
+
+
+*-----------------------------------------------------------
+* FORMATO BASE
+*-----------------------------------------------------------
+FUNCTION FormatearHojaBase
+    LPARAMETERS loHoja
+
+    loHoja.Cells.Font.Name = "Calibri"
+    loHoja.Cells.Font.Size = 11
+    loHoja.Cells.Interior.ColorIndex = 2
+    loHoja.Columns(1).ColumnWidth = 18
+
+ENDFUNC
+
+
+
+*-----------------------------------------------------------
+* ENCABEZADO + TRM
+*-----------------------------------------------------------
+FUNCTION ArmarEncabezadoCashFlow
+    LPARAMETERS loHoja, tcMoneda, ;
+                tdFechaFinal, ldFechaBase, ;
+                tnSemanasAtras, tnSemanasAdelante
+
+    LOCAL lnColumna, lnUltimaColumna
+    LOCAL ldFechaSemana, lnSemana, lnTRM, i
+
+    loHoja.Cells(1,1).Value = ;
+        "Flujo de Caja INTECPLAST SAS " + ;
+        DTOC(tdFechaFinal) + " (" + tcMoneda + ")"
+
+    loHoja.Range("A1").Font.Bold = .T.
+    loHoja.Range("A1").Font.Size = 14
+
+    * Solo mostrar etiqueta TRM si es USD
+    IF tcMoneda = "USD"
+        loHoja.Cells(3,1).Value = "TRM"
+        loHoja.Cells(3,1).Font.Bold = .T.
+    ENDIF
+
+    lnColumna = 2
+
+    FOR i = -tnSemanasAtras TO tnSemanasAdelante
+
+        ldFechaSemana = ldFechaBase + (i * 7)
+        lnSemana = WEEK(ldFechaSemana,2)
+
+        *========================================
+        * TRM SOLO CUANDO SEA USD
+        *========================================
+        IF tcMoneda = "USD"
+            lnTRM = ObtenerTRM(ldFechaSemana)
+            loHoja.Cells(3,lnColumna).Value = lnTRM
+            loHoja.Cells(3,lnColumna).NumberFormat = "#,##0.00"
+        ENDIF
+
+        loHoja.Cells(5,lnColumna).Value = "SEMANA " + TRANSFORM(lnSemana)
+
+        loHoja.Cells(6,lnColumna).Value = ldFechaSemana
+        loHoja.Cells(6,lnColumna).NumberFormat = "dd-mmm"
+
+        IF i = 0
+            loHoja.Cells(4,lnColumna).Value = "ACTUAL"
+            loHoja.Cells(4,lnColumna).Font.Bold = .T.
+            loHoja.Cells(5,lnColumna).Font.Bold = .T.
+        ENDIF
+
+        lnColumna = lnColumna + 1
+
+    ENDFOR
+
+    lnUltimaColumna = lnColumna - 1
+
+    loHoja.Cells(5,1).Value = "PERIODO"
+    loHoja.Cells(5,1).Font.Bold = .T.
+
+    loHoja.Range(loHoja.Cells(5,1), ;
+                  loHoja.Cells(6,lnUltimaColumna)).HorizontalAlignment = -4108
+
+    WITH loHoja.Range(loHoja.Cells(3,1), ;
+                      loHoja.Cells(6,lnUltimaColumna)).Borders
+        .LineStyle = 1
+        .Weight = 2
+    ENDWITH
+
+ENDFUNC
+
+
+
+*-----------------------------------------------------------
+* DATA BASE
+*-----------------------------------------------------------
+FUNCTION ArmarDataCashFlow
+    LPARAMETERS loHoja, tcMoneda
+
+    loHoja.Cells(8,1).Value = "INGRESOS"
+    loHoja.Cells(9,1).Value = "EGRESOS"
+    loHoja.Cells(10,1).Value = "FLUJO NETO"
+
+    loHoja.Range("A8:A10").Font.Bold = .T.
+
+ENDFUNC
+
+
+
+*-----------------------------------------------------------
+* OBTENER TRM DESDE SQL SERVER
+*-----------------------------------------------------------
+FUNCTION ObtenerTRM
+    LPARAMETERS tdFecha
+
+    LOCAL lcSQL, lnResultado, lnValor, lcFecha
+
+    lnValor = 0
+    
+    lcFecha = DTOC(tdFecha,1)
+
+    lcSQL = ;
+        "SELECT TOP 1 VALOR FROM MTCAMBIO " + ;
+        "WHERE FECHA >= '" + lcFecha + "' " + ;
+        "AND FECHA < DATEADD(DAY,1,'" + lcFecha + "') " + ;
+        "ORDER BY FECHA DESC"
+
+    lnResultado = SQLEXEC(ON, lcSQL, "curTRM")
+
+    IF lnResultado > 0 AND RECCOUNT("curTRM") > 0
+        SELECT curTRM
+        lnValor = curTRM.VALOR
+        USE IN curTRM
+    ENDIF
+
+    RETURN lnValor
+ENDFUNC
