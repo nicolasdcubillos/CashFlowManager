@@ -203,27 +203,35 @@ FUNCTION ArmarDataCashFlow
     LOCAL lcSQL, lnResult, laError[1]
 
     lnFilaActual = 8
+    
+    *========================================
+	* 1) HEADER FINANCIERO (ANTES DE INGRESOS)
+	*========================================
+	lnFilaActual = DibujarCashflowHeader(loHoja, ;
+	                                     tnSemanaInicial, ;
+	                                     tnSemanaFinal, ;
+	                                     tcMoneda)
 
     *========================================
     * 2) EJECUTAR VISTA INGRESOS
     *========================================
-    loHoja.Cells(lnFilaActual,1).Value = "INGRESOS"
+    loHoja.Cells(lnFilaActual,1).Value = "Ingresos"
     loHoja.Cells(lnFilaActual,1).Font.Bold = .T.
     lnFilaActual = lnFilaActual + 1
 
     lnFilaInicioIngresos = lnFilaActual
 
     lcSQL = ;
-        "SELECT * FROM CashflowViewIngresos(" + ;
-        ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
-        ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
-        ALLTRIM(tcMoneda) + "')"
+	    "EXEC dbo.CashflowDataIngresosPivot " + ;
+	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
+	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+	    ALLTRIM(tcMoneda) + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrIngresos")
 
     IF lnResult < 0
         AERROR(laError)
-        MESSAGEBOX("Error ejecutando CashflowViewIngresos:" + ;
+        MESSAGEBOX("Error ejecutando CashflowDataIngresosPivot:" + ;
                    CHR(13) + laError[2])
         RETURN .F.
     ENDIF
@@ -238,30 +246,34 @@ FUNCTION ArmarDataCashFlow
                                    lnFilaInicioIngresos, ;
                                    lnFilaFinIngresos, ;
                                    lnFilaActual, ;
-                                   "TOTAL INGRESOS")
+                                   "Total ingresos")
 
     lnFilaActual = lnFilaActual + 2
 
     *========================================
     * 5) EJECUTAR VISTA EGRESOS
     *========================================
-    loHoja.Cells(lnFilaActual,1).Value = "EGRESOS"
+    loHoja.Cells(lnFilaActual,1).Value = "Egresos"
     loHoja.Cells(lnFilaActual,1).Font.Bold = .T.
     lnFilaActual = lnFilaActual + 1
 
     lnFilaInicioEgresos = lnFilaActual
-
+    
     lcSQL = ;
-        "SELECT * FROM CashflowViewEgresos(" + ;
-        ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
-        ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
-        ALLTRIM(tcMoneda) + "')"
+	    "EXEC dbo.CashflowDataEgresosPivot " + ;
+	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
+	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+	    ALLTRIM(tcMoneda) + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrEgresos")
+    
+    MESSAGEBOX("Ejecutado csrEgresos")
+    _cliptext = lcSql
+    MESSAGEBOX(lcSql)
 
     IF lnResult < 0
         AERROR(laError)
-        MESSAGEBOX("Error ejecutando CashflowViewEgresos:" + ;
+        MESSAGEBOX("Error ejecutando CashflowDataEgresosPivot:" + ;
                    CHR(13) + laError[2])
         RETURN .F.
     ENDIF
@@ -275,7 +287,7 @@ FUNCTION ArmarDataCashFlow
                                    lnFilaInicioEgresos, ;
                                    lnFilaFinEgresos, ;
                                    lnFilaActual, ;
-                                   "TOTAL EGRESOS")
+                                   "Total egresos")
 
     lnFilaActual = lnFilaActual + 2
 
@@ -287,6 +299,39 @@ FUNCTION ArmarDataCashFlow
 
 ENDFUNC
 
+*-----------------------------------------------------------
+* DIBUJA HEADER FINANCIERO (ANTES DE INGRESOS)
+*-----------------------------------------------------------
+FUNCTION DibujarCashflowHeader
+    LPARAMETERS loHoja, ;
+                tnSemanaInicial, ;
+                tnSemanaFinal, ;
+                tcMoneda
+
+    LOCAL lcSQL, lnResult, laError[1]
+    LOCAL lnFilaActual
+
+    lnFilaActual = 8
+
+    lcSQL = ;
+	    "EXEC dbo.CashflowDataHeaderPivot " + ;
+	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
+	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+	    tcMoneda + "'"
+
+    lnResult = SQLEXEC(ON, lcSQL, "csrHeader")
+
+    IF lnResult < 0
+        AERROR(laError)
+        MESSAGEBOX("Error ejecutando CashflowDataHeaderPivot:" + CHR(13) + laError[2])
+        RETURN lnFilaActual
+    ENDIF
+
+    * Dibujar cursor completo
+    lnFilaActual = DibujarCursor(loHoja, "csrHeader", lnFilaActual)
+
+    RETURN lnFilaActual + 1
+ENDFUNC
 
 *-----------------------------------------------------------
 * Dibuja cursor completo en Excel
