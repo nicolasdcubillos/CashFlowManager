@@ -729,6 +729,11 @@ FUNCTION FormatearHojaBase
     loHoja.Activate()
     loHoja.Parent.Parent.ActiveWindow.DisplayGridlines = .F.
 
+    * Inmovilizar: filas 1-6 y columnas A-B fijas al desplazarse
+    loHoja.Parent.Parent.ActiveWindow.FreezePanes = .F.  && reset previo
+    loHoja.Cells(8, 3).Select()                          && C7 = justo debajo fila 6, a la derecha de col B
+    loHoja.Parent.Parent.ActiveWindow.FreezePanes = .T.
+
 ENDFUNC
 
 *-----------------------------------------------------------
