@@ -64,10 +64,11 @@ FUNCTION GenerarCashFlowExcel
 
         WAIT WINDOW "Consultando y dibujando datos USD..." NOWAIT  && NUEVO
 
-        ArmarDataCashFlow(loHojaUSD, ;
-                          -tnSemanasAtras, ;   && negativo: semanas hacia atras
-                          tnSemanasAdelante, ;
-                          "USD")
+        * SQL historico: desde -tnSemanasAtras hasta la semana actual (0)
+        ArmarDataCashFlowHistorico(loHojaUSD, ;
+                                   -tnSemanasAtras, ;
+                                   0, ;
+                                   "USD")
 
         *===========================================
         * HOJA 2 - COP
@@ -128,10 +129,11 @@ FUNCTION CrearHojaCashFlow
                             tnSemanasAdelante)
 
     WAIT WINDOW "Consultando y dibujando datos " + tcMoneda + "..." NOWAIT
-    ArmarDataCashFlow(loHoja, ;
-                      -tnSemanasAtras, ;
-                      tnSemanasAdelante, ;
-                      tcMoneda)
+    * SQL historico: desde -tnSemanasAtras hasta la semana actual (0)
+    ArmarDataCashFlowHistorico(loHoja, ;
+                               -tnSemanasAtras, ;
+                               0, ;
+                               tcMoneda)
 
 ENDFUNC
 
@@ -240,11 +242,13 @@ ENDFUNC
 
 
 *-----------------------------------------------------------
-* 2-7) ARMA DATA COMPLETA
-* Ejecuta vistas SQL y dibuja Ingresos, Egresos,
-* Subtotales y Flujo Neto.
+* 2-7) ARMA DATA HISTORICA
+* Ejecuta vistas SQL (solo historico) y dibuja Header,
+* Ingresos, Egresos, Subtotales y Flujo Neto.
+* tnSemanaInicial : numero negativo (ej. -5 = 5 semanas atras)
+* tnSemanaFinal   : 0 = semana actual (no consulta futuro)
 *-----------------------------------------------------------
-FUNCTION ArmarDataCashFlow
+FUNCTION ArmarDataCashFlowHistorico
     LPARAMETERS loHoja, ;
                 tnSemanaInicial, ;
                 tnSemanaFinal, ;
@@ -365,6 +369,24 @@ FUNCTION ArmarDataCashFlow
                      lnFilaActual)
 
 ENDFUNC
+
+
+*-----------------------------------------------------------
+* ARMA DATA FUTURA (pendiente de implementar)
+* Dibujara proyecciones en las columnas futuras a partir
+* de tnSemanaInicial=1 hasta tnSemanaFinal=tnSemanasAdelante.
+* Por ahora NO se invoca desde GenerarCashFlowExcel.
+*-----------------------------------------------------------
+FUNCTION ArmarDataCashFlowFuturo
+    LPARAMETERS loHoja, ;
+                tnSemanaInicial, ;
+                tnSemanaFinal, ;
+                tcMoneda
+
+    * TODO: implementar consulta y dibujo de semanas futuras
+
+ENDFUNC
+
 
 *-----------------------------------------------------------
 * DIBUJA HEADER FINANCIERO (ANTES DE INGRESOS)

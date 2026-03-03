@@ -14,10 +14,13 @@
   egreso y por cada semana del rango indicado. Internamente construye:
     - Numeros / FechaSemana : rango de semanas con sus fechas de inicio y fin.
     - PagosProveedor        : suma abonos de cuentas por pagar (ABOCXP)
-                              agrupados por tipo de proveedor y exterior,
-                              convirtiendo a COP o USD segun @Moneda.
+                              agrupados por tipo de proveedor y exterior.
+                              Convierte siempre a COP (VALOR * TCAMBIO) y
+                              luego divide por TRM si se pide USD.
+    - TRMSemana             : TRM vigente por semana consultada en MTCAMBIO.
     - MovContables          : extrae debitos de nomina (cuentas 51x) e
-                              impuestos (cuentas 24x) desde MVTO.
+                              impuestos (cuentas 24x) desde MVTO (siempre COP).
+                              Divide por TRM si se pide USD.
   El resultado final es un UNION ALL de doce conceptos de egreso.
 
   PROCEDIMIENTO  dbo.CashflowDataEgresosPivot (@SemanaInicial, @SemanaFinal, @Moneda)
@@ -64,6 +67,20 @@ RETURN
         FROM Numeros
     ),
 
+    TRMSemana AS
+    (
+        -- TRM vigente al inicio de cada semana
+        SELECT
+            f.Semana,
+            ISNULL((
+                SELECT TOP 1 VALOR
+                FROM MTCAMBIO c
+                WHERE c.FECHA <= f.FechaInicio
+                ORDER BY c.FECHA DESC
+            ), 1) AS TRM
+        FROM FechaSemana f
+    ),
+
     PagosProveedor AS
     (
         SELECT 
@@ -72,15 +89,19 @@ RETURN
             p.EXTERIOR,
 
             SUM(
+                -- Base siempre en COP: VALOR * TCAMBIO (si es USD) o VALOR * 1 (si es COP)
+                -- Para USD: dividir el COP resultante por la TRM de la semana
                 CASE 
                     WHEN @Moneda = 'COP'
-                        THEN a.VALOR * ISNULL(a.TCAMBIO,1)
+                        THEN a.VALOR * ISNULL(a.TCAMBIO, 1)
                     WHEN @Moneda = 'USD'
-                        THEN a.VALOR
+                        THEN a.VALOR * ISNULL(a.TCAMBIO, 1) / NULLIF(t.TRM, 0)
                 END
             ) AS Valor
 
         FROM FechaSemana f
+
+        LEFT JOIN TRMSemana t ON t.Semana = f.Semana
 
         LEFT JOIN ABOCXP a
             ON a.FECHA BETWEEN f.FechaInicio AND f.FechaFin
@@ -97,16 +118,27 @@ RETURN
 
     MovContables AS
     (
+        -- MVTO contable: nomina (51x) e impuestos (24x) siempre en COP
         SELECT 
             f.Semana,
 
-            SUM(CASE WHEN m.CODIGOCTA LIKE '51%' 
-                     THEN m.CREDITO ELSE 0 END) AS Personal,
+            SUM(CASE WHEN m.CODIGOCTA LIKE '51%'
+                     THEN CASE WHEN @Moneda = 'USD'
+                               THEN m.CREDITO / NULLIF(t.TRM, 0)
+                               ELSE m.CREDITO
+                          END
+                     ELSE 0 END) AS Personal,
 
-            SUM(CASE WHEN m.CODIGOCTA LIKE '24%' 
-                     THEN m.CREDITO ELSE 0 END) AS Impuestos
+            SUM(CASE WHEN m.CODIGOCTA LIKE '24%'
+                     THEN CASE WHEN @Moneda = 'USD'
+                               THEN m.CREDITO / NULLIF(t.TRM, 0)
+                               ELSE m.CREDITO
+                          END
+                     ELSE 0 END) AS Impuestos
 
         FROM FechaSemana f
+
+        LEFT JOIN TRMSemana t ON t.Semana = f.Semana
 
         LEFT JOIN MVTO m
             ON m.FECHAMVTO BETWEEN f.FechaInicio AND f.FechaFin

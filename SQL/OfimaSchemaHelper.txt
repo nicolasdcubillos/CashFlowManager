@@ -1,0 +1,592 @@
+TRADE:
+Column_name	Type	Computed	Length	Prec	Scale	Nullable	TrimTrailingBlanks	FixedLenNullInSource	Collation
+ACTIVA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+APAGAR	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+APROBADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+APRUEBA	char	no	40	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AUTOREQUI	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+AUTORET	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+AUTORIZA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+AUTORIZADO	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AUTRETFAC	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+BANCOPRV	char	no	9	     	     	yes	no	yes	Modern_Spanish_CI_AS
+BASEIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+BRUTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+CALICA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CALRETE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CALRETICA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CARGADA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CIUDADCLI	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODCAJA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODCC	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODCTACXP	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODICA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODIGOCTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODINT	numeric	no	5	4    	0    	yes	(n/a)	(n/a)	NULL
+CODMONEDA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODRETE	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODTCXP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODVEN	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONIVA	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+CONSINV	numeric	no	9	10   	0    	yes	(n/a)	(n/a)	NULL
+CONTADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CTRLCORIG	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CTRTOPES	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+D1FECHA1	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D1FECHA2	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D1FECHA3	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D2FECHA1	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D2FECHA2	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D2FECHA3	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D3FECHA1	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D3FECHA2	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+D3FECHA3	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DCTOORD	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DCTOPMP	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DCTOPRV	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DCTORCM	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DCTOREQUI	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DCTORESER	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DECIMALES	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+DESCARGADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+DESCECOL	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+DESCTOPP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DESCUENTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+DIASPDPP	numeric	no	5	5    	0    	yes	(n/a)	(n/a)	NULL
+DIASPLAZO	numeric	no	5	5    	0    	yes	(n/a)	(n/a)	NULL
+DIR	char	no	200	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DSCTOCOM	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+ENVIADOA	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+FACTORSUS	numeric	no	9	17   	7    	yes	(n/a)	(n/a)	NULL
+FACTURADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+FECCAJA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHA1	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHA2	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHA3	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHAING	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHAMOD	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECING	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECMOD	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FHAUTORIZA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FLETES	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+FORMAPAGO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+HORA	char	no	8	     	     	yes	no	yes	Modern_Spanish_CI_AS
+IMPORTAC	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+IMPRESO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+INTEGRADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+IVABRUTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+MARCDIST	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MEDIOPAG	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MULTIMON	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+NIT	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NITCAJA	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NITRESP	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOTA	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NRODCTO	char	no	10	     	     	no	no	no	Modern_Spanish_CI_AS
+NROSOLI	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NUMCUOTAS	numeric	no	5	2    	0    	yes	(n/a)	(n/a)	NULL
+NUMEROCRP	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ORDEN	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ORIGEN	char	no	3	     	     	no	no	no	Modern_Spanish_CI_AS
+OTRAMON	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PAIS	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDAU	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDIN	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDMO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PESODOLAR	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PGIVA	numeric	no	5	7    	3    	yes	(n/a)	(n/a)	NULL
+PLANEADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+PORAIU	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETENIVA	numeric	no	5	7    	3    	yes	(n/a)	(n/a)	NULL
+PRETICA	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETIVA	numeric	no	5	7    	4    	yes	(n/a)	(n/a)	NULL
+PRIORIDAD	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+REGSIMP	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+REMIFACT	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+REMISION	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+RESERVADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+RESPICA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+RESPRETE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+RETEVAL	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+RTEFTE	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+SINIVA	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+STADSINCRO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+TCAMBIO	numeric	no	9	15   	4    	yes	(n/a)	(n/a)	NULL
+TCAMBIOMM	numeric	no	9	17   	7    	yes	(n/a)	(n/a)	NULL
+TCR	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+TIPOCAR	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOCXP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTO	char	no	2	     	     	no	no	no	Modern_Spanish_CI_AS
+TIPODCTOPC	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTORE	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOSI	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOTR	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOMONEDA	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOMVTO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOPER	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOREQ	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOVTA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TOPE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+TRANSPORTA	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+UNDTRIBU	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+UPAC	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+VALORPLAN	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VIGENTE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+VIPCONSU	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VLRETFTE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRECICA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRETENIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRETICA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRETIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRETIVASIM	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRTEFTEA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XBASEIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XBRUTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XCONIVA	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+XDESCUENTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XFLETES	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+XIVABRUTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XRECICA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XRETENIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XRETICA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XRETIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XRETIVASIM	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XSINIVA	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+XVLRETFTE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XVRTEFTEA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZBASEIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZBRUTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZCONIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZDESCUENTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZFLETES	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZIVABRUTO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZRECICA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZRETENIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZRETICA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZRETIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZRETIVASIM	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZSINIVA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZVLRETFTE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZVRTEFTEA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+PEDGUID	uniqueidentifier	no	16	     	     	yes	(n/a)	(n/a)	NULL
+FECHAPANTE	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FISCAL	char	no	11	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROCMPIVA	char	no	14	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOTRAN	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+APORTE1	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+APORTE2	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+APORTE3	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+AUTORIZPOR	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AUTRETICA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+COMENTARIO	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+FISRL	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FIVA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FLLAMADA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FRECAUDO	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+IDADJUNTOS	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MOTIVOTRAS	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROCMPISLR	char	no	14	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PLACA	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PLANILLA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PLANPED	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+RESPONSA	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+VLRECAUDO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRETICAA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VRSEGURIDA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XVRETICAA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZVRETICAA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ABONO	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CAJAREG	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONSFECHA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+CONSNUMERO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+GENELECT	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+NRODCTOAN	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PRETPERC	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETPERP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+TIPOABONO	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOAN	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+VDETRACCIO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VPERCEPCIO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+PRETECREE	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+VLRETCREE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+VLRETCREEA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+OTROIMPU	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XVLRETCREE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+XVRETCREEA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZVLRETCREE	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZVRETCREEA	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+INTNIIF	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+MECADORIG	text	no	16	     	     	yes	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MECANCELA	text	no	16	     	     	yes	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MEFALLO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+MEFECHAT	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+MENOCERSAT	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MESELLOCFD	text	no	16	     	     	yes	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MESELLOSAT	text	no	16	     	     	yes	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MEUUID	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MEVERSION	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MEXML	text	no	16	     	     	yes	(n/a)	(n/a)	Modern_Spanish_CI_AS
+DESCFINANC	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+DETERIORO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+FECHANIF	datetime	no	8	     	     	no	(n/a)	(n/a)	NULL
+IDINTEGRA	char	no	40	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOCORRIENT	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+TASAINTERE	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+VALCONSUMO	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+VLRECONOCE	numeric	no	9	17   	2    	no	(n/a)	(n/a)	NULL
+XDESFINANC	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+ZDESFINANC	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+INDEPENDIE	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+IVAINCLUDO	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+VALORAYS	numeric	no	9	17   	2    	no	(n/a)	(n/a)	NULL
+IMPCIGARRI	numeric	no	9	17   	2    	no	(n/a)	(n/a)	NULL
+CODUSOCFDI	char	no	10	     	     	no	no	no	Modern_Spanish_CI_AS
+CORRELATID	char	no	250	     	     	no	no	no	Modern_Spanish_CI_AS
+DCTORELSAT	char	no	10	     	     	no	no	no	Modern_Spanish_CI_AS
+MEUUIDAC	char	no	250	     	     	no	no	no	Modern_Spanish_CI_AS
+MECANACUSE	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+
+MVTRADE:
+Column_name	Type	Computed	Length	Prec	Scale	Nullable	TrimTrailingBlanks	FixedLenNullInSource	Collation
+BASE	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+BODEGA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CANTEMPAQ	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+CANTIDAD	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+CANTORIG	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+CANTREMIS	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+CANVENTA	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+CARGOA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODCC	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODIGOCTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODINT	numeric	no	5	4    	0    	yes	(n/a)	(n/a)	NULL
+CODRETE	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODRETICA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODTRAS	numeric	no	9	10   	0    	yes	(n/a)	(n/a)	NULL
+CODUBICA	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONSECUT	numeric	no	9	10   	0    	yes	(n/a)	(n/a)	NULL
+COSTEO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+COSTO	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+DESCFINAN	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DESCUENTO	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DETALLE	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DSCTOFINAN	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+FACTURADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+FECENT	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECING	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECMOD	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FHCOMPRA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+HCOSTO	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+HVALUNID	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+IDMVTRADE	int	no	4	10   	0    	no	(n/a)	(n/a)	NULL
+IDPEDORD	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+IDREMIS	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+IDREQORD	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+IMPORTAC	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+INCIDENTE	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+INTEGRADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+INTEGTALL	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+IVA	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+LOGIN	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MVTOTRAS	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NIT	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOMBRE	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NORDEN	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOTA	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOTAS	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+NPEDIDO	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROBONO	numeric	no	9	12   	0    	yes	(n/a)	(n/a)	NULL
+NRODCTO	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROFACTURA	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROORDEN	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROSOLI	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NUMFACTNC	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ORDENADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+ORDENNRO	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ORDENPRV	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ORIGEN	char	no	3	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASATERORD	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+PASSWORDIN	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDMO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PESODOLAR	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PORETE	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PORICA	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETFTE	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRODUCTO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+REMIFACT	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+SERFLETES	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+STADSINCRO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+SUCURSAL	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTO	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOFA	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTONC	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOPC	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTORE	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOSI	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTOTR	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOMVTO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TOPRETE	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+TOPRETICA	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+TRASLADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+UNDBASE	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+UNDVENTA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+VALORUNIT	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+VALUNID	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+VENDEDOR	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+VLRVENTA	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+XCOSTO	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+XVALORUN	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+XVALUNID	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+ZVALORUNIT	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+IPCONSUMO	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+CTAVTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOTADOS	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+BASEIMPOR	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+BIVAIMPOR	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+PLANPED	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CODDETRA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+IDIMPUESTO	char	no	100	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PORCENTA	numeric	no	9	11   	7    	yes	(n/a)	(n/a)	NULL
+PORCENTI	numeric	no	9	11   	7    	yes	(n/a)	(n/a)	NULL
+PORCENTU	numeric	no	9	11   	7    	yes	(n/a)	(n/a)	NULL
+PORDETRA	numeric	no	5	6    	0    	yes	(n/a)	(n/a)	NULL
+TOPDETRA	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+IDREQSOL	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+ITEMICA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+ITEMIVA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+ITEMRETE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+FORMULA	int	no	4	10   	0    	no	(n/a)	(n/a)	NULL
+INTNIIF	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+IPCONSUBEB	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+NCOSTO	numeric	no	13	20   	7    	no	(n/a)	(n/a)	NULL
+NVALUNID	numeric	no	13	20   	7    	no	(n/a)	(n/a)	NULL
+PLANEAR	numeric	no	13	20   	7    	yes	(n/a)	(n/a)	NULL
+PRETENIVA	numeric	no	5	8    	4    	no	(n/a)	(n/a)	NULL
+TARIVA	char	no	5	     	     	no	no	no	Modern_Spanish_CI_AS
+VALORAIU	numeric	no	13	20   	7    	no	(n/a)	(n/a)	NULL
+IDINTEGRA	char	no	40	     	     	no	no	no	Modern_Spanish_CI_AS
+METRETIVA	char	no	1	     	     	no	no	no	Modern_Spanish_CI_AS
+PORAYS	numeric	no	5	6    	2    	no	(n/a)	(n/a)	NULL
+IMPCIGARRI	numeric	no	9	17   	2    	no	(n/a)	(n/a)	NULL
+XNCOSTO	numeric	no	13	20   	7    	no	(n/a)	(n/a)	NULL
+XNVALUNID	numeric	no	13	20   	7    	no	(n/a)	(n/a)	NULL
+CTAVTANIIF	char	no	20	     	     	no	no	no	Modern_Spanish_CI_AS
+
+MTPROCLI
+
+Column_name	Type	Computed	Length	Prec	Scale	Nullable	TrimTrailingBlanks	FixedLenNullInSource	Collation
+APELLIDO1	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+APELLIDO2	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AUTORET	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+BANCO	char	no	9	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CALIFCALID	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+CALIFTIEMP	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+CANAL	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CDCIIU	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CIIU	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CIUDAD	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CIUDADPRV	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODALTERNO	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODDESFIN	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODDESFINP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODIGOCTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODIGOCTAP	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODPOSTAL	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODPOSTALP	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODPRECIO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODPRECIOP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODRETE	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODRETEP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODRUTA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+COL_DEL	char	no	100	     	     	yes	no	yes	Modern_Spanish_CI_AS
+COMENTARIO	char	no	100	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONTACTO	char	no	35	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONTRIBUYE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CTACTE	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CUPOCR	numeric	no	9	14   	2    	yes	(n/a)	(n/a)	NULL
+CUPOCRP	numeric	no	9	17   	2    	yes	(n/a)	(n/a)	NULL
+CURP	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DESCCOMER	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DESCCOMERP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DESCFINAN	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DESCFINANP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+DETALLE	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+DIRECCION	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+EMAIL	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+EMAILP	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ENTRECALLE	char	no	100	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESCLIENTE	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESPROVEE	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESTRATO	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+EXTERIOR	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+FECHAING	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECNAC	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+HABILITADO	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+IDENTIFICA	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+INTCAR	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+LOCAL	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NIT	char	no	15	     	     	no	no	no	Modern_Spanish_CI_AS
+NITSUCUR	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOMBRE	char	no	200	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOMBRE1	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOMBRE2	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NRORESOL	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NUMCTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PAGINAWEB	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORD	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWPROV	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PERIODOFAC	numeric	no	5	3    	0    	yes	(n/a)	(n/a)	NULL
+PLAZO	numeric	no	5	3    	0    	yes	(n/a)	(n/a)	NULL
+PLAZOP	numeric	no	5	3    	0    	yes	(n/a)	(n/a)	NULL
+PORAIU	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PORAIUP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETICA	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETICAP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETIVA	numeric	no	5	7    	4    	yes	(n/a)	(n/a)	NULL
+PRETIVAP	numeric	no	5	7    	3    	yes	(n/a)	(n/a)	NULL
+REGSIMP	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+REPORTDC	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+RESPRETE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+RETICA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+RETICAP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+STADSINCRO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+SUCURSAL	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+TEL1	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TEL2	char	no	30	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOCAR	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOCLI	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOCTA	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+TIPOCXP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOIDEN	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOPER	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOPRV	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+VENDEDOR	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ZONA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PERSONANJ	numeric	no	5	1    	0    	yes	(n/a)	(n/a)	NULL
+ISPROSPECT	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CLASE	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+IDCANALENT	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+PAIS	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AVALCOD	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AVALDIREC	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AVALNOMBRE	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+AVALTEL	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CIUDADMX	char	no	40	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONSUMIDOR	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CONTESP	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+DELEGACION	char	no	100	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESMAQUILA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+ESTADOMX	char	no	100	     	     	yes	no	yes	Modern_Spanish_CI_AS
+FECING	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECMOD	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+IDADJUNTOS	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+INDEPENDIE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+LOCALIDAD	char	no	40	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROENTREGA	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROINTERNO	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PAISMX	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDIN	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDMO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIDENTI	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODDEPTO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESDECLARA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+FACELECTRO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+NUMCUENTA	char	no	50	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PRETPERC	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+PRETPERP	numeric	no	5	6    	2    	yes	(n/a)	(n/a)	NULL
+ESPERCAR	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+ESRESPCREE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+ESRETCREE	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+NDIAGRACIA	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+MEADENDA	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODCTANIIF	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CTANIIFPRV	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CLAVEPAGO	char	no	3	     	     	no	no	no	Modern_Spanish_CI_AS
+MEDPAG	char	no	5	     	     	no	no	no	Modern_Spanish_CI_AS
+CDUSOCFDI	char	no	10	     	     	no	no	no	Modern_Spanish_CI_AS
+BANCOCLI	char	no	10	     	     	no	no	no	Modern_Spanish_CI_AS
+EMAILCAR	char	no	250	     	     	no	no	no	Modern_Spanish_CI_AS
+EMAILCXP	char	no	250	     	     	no	no	no	Modern_Spanish_CI_AS
+COMPLECFDI	char	no	250	     	     	no	no	no	Modern_Spanish_CI_AS
+habilprov	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+
+MVBANCOS
+Column_name	Type	Computed	Length	Prec	Scale	Nullable	TrimTrailingBlanks	FixedLenNullInSource	Collation
+BENEFICIA	char	no	35	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODCC	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODIGOCTA	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODINT	numeric	no	5	4    	0    	yes	(n/a)	(n/a)	NULL
+CONTROL	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CRUZADO	numeric	no	5	2    	0    	yes	(n/a)	(n/a)	NULL
+DCTO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+DETALLE	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+FECHA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECHACGN	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECING	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+FECMOD	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+IDMVBANCOS	int	no	4	10   	0    	no	(n/a)	(n/a)	NULL
+INTEGRADO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+MARCAREG	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NIT	char	no	15	     	     	yes	no	yes	Modern_Spanish_CI_AS
+OTRAMON	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+PASSWORDIN	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PASSWORDMO	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+STADSINCRO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+TCAMBIO	numeric	no	13	20   	8    	yes	(n/a)	(n/a)	NULL
+TIPOMVTO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+VALOR	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+CODCTATRAS	char	no	10	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CONSECUT	numeric	no	13	20   	0    	yes	(n/a)	(n/a)	NULL
+DCTORIG	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESAUTCO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+IDPROPCON	int	no	4	10   	0    	yes	(n/a)	(n/a)	NULL
+ORIGEN	char	no	3	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPODCTO	char	no	2	     	     	yes	no	yes	Modern_Spanish_CI_AS
+INTIVA	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+DCTONIIF	char	no	22	     	     	no	no	no	Modern_Spanish_CI_AS
+DCTORECLAS	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+DCTOREVER	char	no	22	     	     	no	no	no	Modern_Spanish_CI_AS
+INTNIIF	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+RECLASIFIC	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+REVERSADO	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+IDINTEGRA	char	no	40	     	     	no	no	no	Modern_Spanish_CI_AS
+TCAMBIOMM	numeric	no	13	20   	8    	no	(n/a)	(n/a)	NULL
+MECADORIG	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MECANCELA	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MEFALLO	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+MEFECHAT	datetime	no	8	     	     	no	(n/a)	(n/a)	NULL
+MENOCERSAT	char	no	30	     	     	no	no	no	Modern_Spanish_CI_AS
+MESELLOCFD	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MESELLOSAT	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+MEUUID	char	no	50	     	     	no	no	no	Modern_Spanish_CI_AS
+MEUUIDAC	char	no	250	     	     	no	no	no	Modern_Spanish_CI_AS
+MEVERSION	char	no	5	     	     	no	no	no	Modern_Spanish_CI_AS
+MEXML	text	no	16	     	     	no	(n/a)	(n/a)	Modern_Spanish_CI_AS
+
+MTBANCOS
+
+Column_name	Type	Computed	Length	Prec	Scale	Nullable	TrimTrailingBlanks	FixedLenNullInSource	Collation
+AUTORIZADO	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CODIGOCTA	char	no	10	     	     	no	no	no	Modern_Spanish_CI_AS
+DIGITOS	numeric	no	5	2    	0    	yes	(n/a)	(n/a)	NULL
+FHAPERTURA	datetime	no	8	     	     	yes	(n/a)	(n/a)	NULL
+GERENTE	char	no	35	     	     	yes	no	yes	Modern_Spanish_CI_AS
+MONEDA	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOMBRE	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NOTA	char	no	250	     	     	yes	no	yes	Modern_Spanish_CI_AS
+NROCTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+OTRAMON	char	no	1	     	     	yes	no	yes	Modern_Spanish_CI_AS
+PROPOSITO	char	no	60	     	     	yes	no	yes	Modern_Spanish_CI_AS
+SALINICIAL	numeric	no	9	15   	2    	yes	(n/a)	(n/a)	NULL
+STADSINCRO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+TIPOCONS	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+TIPOMVTO	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ULTCONCIL	numeric	no	5	2    	0    	yes	(n/a)	(n/a)	NULL
+CONSECUT	numeric	no	13	20   	0    	yes	(n/a)	(n/a)	NULL
+CUENTA	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+ESAUTCO	bit	no	1	     	     	yes	(n/a)	(n/a)	NULL
+CLAVEAGRUP	char	no	5	     	     	yes	no	yes	Modern_Spanish_CI_AS
+CTANIIF	char	no	20	     	     	yes	no	yes	Modern_Spanish_CI_AS
+EXTRANJERO	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+NIT	char	no	15	     	     	no	no	no	Modern_Spanish_CI_AS
