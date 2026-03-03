@@ -14,6 +14,7 @@
 #DEFINE COLOR_HEADER_FONDO   12419407   && RGB( 79,129,189) - azul #4F81BD, fila PERIODO
 #DEFINE COLOR_FILA_PAR       15853019   && RGB(219,229,241) - gris claro #DBE5F1, filas pares
 #DEFINE COLOR_FILA_IMPAR     16777215   && RGB(255,255,255) - blanco, filas impares
+#DEFINE COLOR_TOTALES        14341079   && RGB(215,211,218) - lila claro #D7D3DA, seccion totales
 *-----------------------------------------------------------
 * FUNCI�N PRINCIPAL
 * Genera archivo Excel completo (USD y COP)
@@ -25,7 +26,20 @@ FUNCTION GenerarCashFlowExcel
 
     LOCAL loExcel, loLibro, loHojaUSD
     LOCAL ldFechaBase
-    LOCAL lcErrorDetalle
+    LOCAL lcErrorDetalle, lcNombreArchivo, lcRuta
+    LOCAL ARRAY laNomMeses[12]
+    laNomMeses[1]  = "Enero"
+    laNomMeses[2]  = "Febrero"
+    laNomMeses[3]  = "Marzo"
+    laNomMeses[4]  = "Abril"
+    laNomMeses[5]  = "Mayo"
+    laNomMeses[6]  = "Junio"
+    laNomMeses[7]  = "Julio"
+    laNomMeses[8]  = "Agosto"
+    laNomMeses[9]  = "Septiembre"
+    laNomMeses[10] = "Octubre"
+    laNomMeses[11] = "Noviembre"
+    laNomMeses[12] = "Diciembre"
 
     IF PCOUNT() < 3
         MESSAGEBOX("Debe enviar FechaFinal, SemanasAtras, SemanasAdelante",16,"Error")
@@ -36,7 +50,11 @@ FUNCTION GenerarCashFlowExcel
 
         WAIT WINDOW "Inicializando generaci�n de Flujo de Caja..." NOWAIT  && NUEVO
 
-        * Ajustar fecha al lunes
+        * Nombre del archivo de salida
+        lcNombreArchivo = "FlujoDeCaja_Intecplast_" + ;
+                          laNomMeses[MONTH(tdFechaFinal)] + ;
+                          TRANSFORM(YEAR(tdFechaFinal)) + ".xlsx"
+        lcRuta = ADDBS(CURDIR()) + lcNombreArchivo
         ldFechaBase = tdFechaFinal - (DOW(tdFechaFinal,2) - 1)
 
         loExcel = CREATEOBJECT("Excel.Application")
@@ -65,25 +83,40 @@ FUNCTION GenerarCashFlowExcel
         WAIT WINDOW "Consultando y dibujando datos USD..." NOWAIT  && NUEVO
 
         * SQL historico: desde -tnSemanasAtras hasta la semana actual (0)
-        ArmarDataCashFlowHistorico(loHojaUSD, ;
-                                   -tnSemanasAtras, ;
-                                   0, ;
-                                   "USD")
+        IF NOT ArmarDataCashFlowHistorico(loHojaUSD, ;
+                                          -tnSemanasAtras, ;
+                                          0, ;
+                                          "USD")
+            RETURN .F.
+        ENDIF
 
         *===========================================
         * HOJA 2 - COP
         *===========================================
         WAIT WINDOW "Construyendo hoja COP..." NOWAIT  && NUEVO
 
-        CrearHojaCashFlow(loLibro, ;
-                          "COP", ;
-                          tdFechaFinal, ;
-                          ldFechaBase, ;
-                          tnSemanasAtras, ;
-                          tnSemanasAdelante)
+        IF NOT CrearHojaCashFlow(loLibro, ;
+                                  "COP", ;
+                                  tdFechaFinal, ;
+                                  ldFechaBase, ;
+                                  tnSemanasAtras, ;
+                                  tnSemanasAdelante)
+            RETURN .F.
+        ENDIF
 
-        WAIT CLEAR  && NUEVO
-        WAIT WINDOW "Flujo de Caja generado correctamente." TIMEOUT 2  && NUEVO
+        * Guardar archivo con nombre estandar
+        WAIT WINDOW "Guardando " + lcNombreArchivo + "..." NOWAIT
+        loLibro.SaveAs(lcRuta, 51)  && 51 = xlOpenXMLWorkbook (.xlsx)
+
+        WAIT CLEAR
+        MESSAGEBOX( ;
+            "Flujo de Caja generado exitosamente." + CHR(13)+CHR(10)+CHR(13)+CHR(10) + ;
+            "Archivo:    " + lcNombreArchivo + CHR(13)+CHR(10) + ;
+            "Periodo:    " + laNomMeses[MONTH(tdFechaFinal)] + " " + TRANSFORM(YEAR(tdFechaFinal)) + CHR(13)+CHR(10) + ;
+            "Historico:  " + TRANSFORM(tnSemanasAtras)    + " semanas atras"    + CHR(13)+CHR(10) + ;
+            "Proyeccion: " + TRANSFORM(tnSemanasAdelante) + " semanas adelante", ;
+            64, ;
+            "Flujo de Caja - INTECPLAST")
 
     CATCH TO loError
 
@@ -130,11 +163,14 @@ FUNCTION CrearHojaCashFlow
 
     WAIT WINDOW "Consultando y dibujando datos " + tcMoneda + "..." NOWAIT
     * SQL historico: desde -tnSemanasAtras hasta la semana actual (0)
-    ArmarDataCashFlowHistorico(loHoja, ;
-                               -tnSemanasAtras, ;
-                               0, ;
-                               tcMoneda)
+    IF NOT ArmarDataCashFlowHistorico(loHoja, ;
+                                      -tnSemanasAtras, ;
+                                      0, ;
+                                      tcMoneda)
+        RETURN .F.
+    ENDIF
 
+    RETURN .T.
 ENDFUNC
 
 *-----------------------------------------------------------
@@ -242,9 +278,9 @@ ENDFUNC
 
 
 *-----------------------------------------------------------
-* 2-7) ARMA DATA HISTORICA
+* 2-8) ARMA DATA HISTORICA
 * Ejecuta vistas SQL (solo historico) y dibuja Header,
-* Ingresos, Egresos, Subtotales y Flujo Neto.
+* Ingresos, Egresos, Flujo Economico, Subtotales y Flujo Neto.
 * tnSemanaInicial : numero negativo (ej. -5 = 5 semanas atras)
 * tnSemanaFinal   : 0 = semana actual (no consulta futuro)
 *-----------------------------------------------------------
@@ -256,7 +292,9 @@ FUNCTION ArmarDataCashFlowHistorico
 
     LOCAL lnFilaActual
     LOCAL lnFilaInicioIngresos, lnFilaFinIngresos
-    LOCAL lnFilaInicioEgresos, lnFilaFinEgresos
+    LOCAL lnFilaInicioEgresos,  lnFilaFinEgresos
+    LOCAL lnFilaInicioFlujoEco, lnFilaFinFlujoEco
+    LOCAL lnTmpCol, lnUltimaColData
     LOCAL lcSQL, lnResult, laError[1]
 
     lnFilaActual = 8
@@ -359,14 +397,83 @@ FUNCTION ArmarDataCashFlowHistorico
                                    lnFilaActual, ;
                                    "Total egresos")
 
-    lnFilaActual = lnFilaActual + 2
+    lnFilaActual = lnFilaActual + 1
 
-    * 7) Flujo Neto
-    WAIT WINDOW "Calculando Flujo Neto " + tcMoneda + "..." NOWAIT
-    DibujarFlujoNeto(loHoja, ;
-                     lnFilaFinIngresos + 1, ;
-                     lnFilaFinEgresos + 1, ;
-                     lnFilaActual)
+    *========================================
+    * 7) EJECUTAR FLUJO ECONOMICO
+    *========================================
+    WAIT WINDOW "Ejecutando consulta de Flujo Economico " + tcMoneda + "..." NOWAIT
+    LOCAL lnColsec3
+    lnColsec3 = loHoja.Cells(lnFilaActual-1, loHoja.Columns.Count).End(-4159).Column
+    IF lnColsec3 < 2
+        lnColsec3 = 10
+    ENDIF
+    loHoja.Range(loHoja.Cells(lnFilaActual,2), loHoja.Cells(lnFilaActual,lnColsec3)).Interior.Color = ColorFilaAlternar(lnFilaActual)
+    loHoja.Cells(lnFilaActual,2).Value = "Flujo Economico"
+    loHoja.Cells(lnFilaActual,2).Font.Bold = .T.
+    lnFilaActual = lnFilaActual + 1
+
+    lnFilaInicioFlujoEco = lnFilaActual
+
+    lcSQL = ;
+        "EXEC dbo.CashflowDataFlujoEconomicoPivot " + ;
+        ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
+        ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+        ALLTRIM(tcMoneda) + "'"
+
+    lnResult = SQLEXEC(ON, lcSQL, "csrFlujoEco")
+
+    IF lnResult < 0
+        AERROR(laError)
+        MESSAGEBOX("Error ejecutando CashflowDataFlujoEconomicoPivot:" + ;
+                   CHR(13) + laError[2])
+        RETURN .F.
+    ENDIF
+
+    * 8) Dibujar flujo economico
+    WAIT WINDOW "Dibujando Flujo Economico en Excel " + tcMoneda + "..." NOWAIT
+    lnFilaActual = DibujarCursor(loHoja, "csrFlujoEco", lnFilaActual)
+
+    lnFilaFinFlujoEco = lnFilaActual - 1
+
+    lnFilaActual = DibujarSubtotal(loHoja, ;
+                                   lnFilaInicioFlujoEco, ;
+                                   lnFilaFinFlujoEco, ;
+                                   lnFilaActual, ;
+                                   "Total Financiamiento")
+
+    lnFilaActual = lnFilaActual + 1
+
+    *========================================
+    * 10) FLUJO DE CAJA FINANCIERO (en 0 por ahora)
+    *========================================
+    lnUltimaColData = loHoja.Cells(lnFilaActual-1, loHoja.Columns.Count).End(-4159).Column
+    IF lnUltimaColData < 3
+        lnUltimaColData = 10
+    ENDIF
+
+    loHoja.Cells(lnFilaActual,2).Value = "Flujo de Caja Financiero"
+    loHoja.Cells(lnFilaActual,2).Font.Bold = .T.
+    loHoja.Range(loHoja.Cells(lnFilaActual,2), loHoja.Cells(lnFilaActual,lnUltimaColData)).Interior.Color = ColorFilaAlternar(lnFilaActual)
+    FOR lnTmpCol = 3 TO lnUltimaColData
+        loHoja.Cells(lnFilaActual,lnTmpCol).Value         = 0
+        loHoja.Cells(lnFilaActual,lnTmpCol).NumberFormat  = "#,##0;-#,##0;" + CHR(34) + "-" + CHR(34)  && 0 muestra guion
+        loHoja.Cells(lnFilaActual,lnTmpCol).Font.Bold     = .T.
+    ENDFOR
+    WITH loHoja.Range(loHoja.Cells(lnFilaActual,2), loHoja.Cells(lnFilaActual,lnUltimaColData)).Borders
+        .LineStyle = 1
+        .Weight    = 2
+    ENDWITH
+    lnFilaActual = lnFilaActual + 3  && fila Flujo Financiero + 2 blancos
+
+    *========================================
+    * 11) TOTALES (calculados en VFP, sin SQL)
+    *========================================
+    WAIT WINDOW "Dibujando Totales " + tcMoneda + "..." NOWAIT
+    DibujarTotalesCashFlow(loHoja, lnFilaActual, lnUltimaColData)
+
+    * Ajustar ancho columna B al texto mas largo
+    loHoja.Columns(2).AutoFit()
 
 ENDFUNC
 
@@ -448,11 +555,12 @@ FUNCTION DibujarCursor
         ENDFOR
 
         * Formato numerico en columnas de datos (col 3 en adelante)
+        * 0 muestra guion (-) visualmente, valor real sigue siendo 0
         IF lnTotalCols > 1
             loHoja.Range( ;
                 loHoja.Cells(lnFilaActual, 3), ;
                 loHoja.Cells(lnFilaActual, lnTotalCols + 1) ;
-            ).NumberFormat = "#,##0"
+            ).NumberFormat = "#,##0;-#,##0;" + CHR(34) + "-" + CHR(34)
         ENDIF
 
         * Borde fino en la fila de datos
@@ -505,7 +613,7 @@ FUNCTION DibujarSubtotal
             lcLetraCol + TRANSFORM(lnFilaFin) + ")"
 
         loHoja.Cells(lnFilaSubtotal,lnCol).Font.Bold = .T.
-        loHoja.Cells(lnFilaSubtotal,lnCol).NumberFormat = "#,##0"
+        loHoja.Cells(lnFilaSubtotal,lnCol).NumberFormat = "#,##0;-#,##0;" + CHR(34) + "-" + CHR(34)  && 0 muestra guion
 
     ENDFOR
 
@@ -523,49 +631,50 @@ ENDFUNC
 
 
 *-----------------------------------------------------------
-* Calcula Flujo Neto (Ingresos - Egresos)
+* Dibuja seccion de Totales (calculados en VFP, sin SQL)
+* Color fijo #D7D3DA sin alternar - 7 conceptos en 0 por ahora
 *-----------------------------------------------------------
-FUNCTION DibujarFlujoNeto
-    LPARAMETERS loHoja, ;
-                lnFilaTotalIngresos, ;
-                lnFilaTotalEgresos, ;
-                lnFilaActual
+FUNCTION DibujarTotalesCashFlow
+    LPARAMETERS loHoja, lnFilaInicio, lnUltimaCol
 
-    LOCAL lnCol, lcLetraCol
-    LOCAL lnUltimaCol
+    LOCAL lnFila, lnCol, lnIdx
+    LOCAL ARRAY laTitulos[7]
+    laTitulos[1] = "PA Credicorp - Caja Retenida Reserva Credito (83237)"
+    laTitulos[2] = "PA Credicorp - Caja Retenida Pago Cuota Trimestral (83238)"
+    laTitulos[3] = "FIC Credicorp - Provision Impuesto al Plastico"
+    laTitulos[4] = "Disponible Bancos"
+    laTitulos[5] = "TOTAL 30 NOV 2025"
+    laTitulos[6] = "TOTAL CONTABILIDAD"
+    laTitulos[7] = "DIFERENCIA"
 
-    loHoja.Cells(lnFilaActual,2).Value = "FLUJO NETO"
-    loHoja.Cells(lnFilaActual,2).Font.Bold = .T.
+    lnFila = lnFilaInicio
 
-    lnUltimaCol = loHoja.Cells(lnFilaActual-1, ;
-                   loHoja.Columns.Count).End(-4159).Column
+    FOR lnIdx = 1 TO 7
 
-    loHoja.Range( ;
-        loHoja.Cells(lnFilaActual, 2), ;
-        loHoja.Cells(lnFilaActual, lnUltimaCol) ;
-    ).Interior.Color = ColorFilaAlternar(lnFilaActual)
+        loHoja.Cells(lnFila,2).Value = laTitulos[lnIdx]
 
-    FOR lnCol = 3 TO lnUltimaCol
+        * Color fijo #D7D3DA en toda la fila, sin alternar
+        loHoja.Range( ;
+            loHoja.Cells(lnFila,2), ;
+            loHoja.Cells(lnFila,lnUltimaCol) ;
+        ).Interior.Color = COLOR_TOTALES
 
-        lcLetraCol = ColumnaLetra(lnCol)
+        FOR lnCol = 3 TO lnUltimaCol
+            loHoja.Cells(lnFila,lnCol).Value        = 0  && TODO: calcular con data en memoria
+            loHoja.Cells(lnFila,lnCol).NumberFormat = "#,##0;-#,##0;" + CHR(34) + "-" + CHR(34)  && 0 muestra guion
+        ENDFOR
 
-        loHoja.Cells(lnFilaActual,lnCol).Formula = ;
-            "=" + lcLetraCol + TRANSFORM(lnFilaTotalIngresos) + ;
-            "-" + lcLetraCol + TRANSFORM(lnFilaTotalEgresos)
+        WITH loHoja.Range( ;
+            loHoja.Cells(lnFila,2), ;
+            loHoja.Cells(lnFila,lnUltimaCol) ;
+        ).Borders
+            .LineStyle = 1
+            .Weight    = 2
+        ENDWITH
 
-        loHoja.Cells(lnFilaActual,lnCol).Font.Bold = .T.
-        loHoja.Cells(lnFilaActual,lnCol).NumberFormat = "#,##0"
+        lnFila = lnFila + 1
 
     ENDFOR
-
-    * Borde fino en la fila de flujo neto
-    WITH loHoja.Range( ;
-        loHoja.Cells(lnFilaActual, 2), ;
-        loHoja.Cells(lnFilaActual, lnUltimaCol) ;
-    ).Borders
-        .LineStyle = 1
-        .Weight    = 2
-    ENDWITH
 
 ENDFUNC
 
@@ -611,7 +720,7 @@ FUNCTION FormatearHojaBase
     loHoja.Cells.Font.Name = "Calibri"
     loHoja.Cells.Font.Size = 11
     loHoja.Columns(1).ColumnWidth = 3    && col A vacia delgada (formato)
-    loHoja.Columns(2).ColumnWidth = 25   && col B etiquetas
+    && col B: ancho inicial, AutoFit se aplica al terminar de dibujar datos
 
     * Fondo blanco toda la hoja
     loHoja.Cells.Interior.Color = COLOR_BLANCO  && fondo blanco toda la hoja
