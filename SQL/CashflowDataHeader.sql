@@ -1,11 +1,42 @@
 /*
-    CashflowDataHeader
-    Vista y Pivot.
-    
-    EXEC dbo.CashflowDataHeaderPivot 
+================================================================================
+  Archivo      : CashflowDataHeader.sql
+  Descripcion  : Saldos bancarios iniciales y disponibilidad de caja por
+                 semana para el encabezado del flujo de caja.
+                 Incluye saldo COP, saldo USD convertido, prestamos y
+                 total disponible en bancos.
+  Autor        : CC Sistemas
+  Fecha        : 2026-03-02
+================================================================================
+
+  FUNCION  dbo.CashflowDataHeader (@SemanaInicial, @SemanaFinal, @Moneda)
+  -----------------------------------------------------------------------
+  Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto de
+  saldo y por cada semana del rango indicado. Internamente construye:
+    - Numeros / FechaSemana : rango de semanas con la fecha de inicio de
+                              cada una (base fija 2020-01-06).
+    - TRM                   : consulta la tasa de cambio vigente en MTCAMBIO
+                              para la fecha de inicio de cada semana.
+    - Saldos                : acumula movimientos bancarios (MVBANCOS) hasta
+                              la fecha de cada semana, separando COP, USD
+                              y cuentas de prestamo.
+  Retorna cuatro conceptos: Saldo inicial COP, Saldo inicial USD,
+  PA Credicorp - Excedentes y Disponible Bancos.
+
+  PROCEDIMIENTO  dbo.CashflowDataHeaderPivot (@SemanaInicial, @SemanaFinal, @Moneda)
+  -----------------------------------------------------------------------------------
+  Stored Procedure que transpone la salida de la funcion en una matriz
+  donde cada columna es un numero de semana. Construye dinamicamente la
+  lista de columnas y ejecuta un PIVOT con SUM(Valor) FOR Semana mediante
+  sp_executesql. El resultado se ordena con CASE segun el orden logico
+  de los conceptos del encabezado.
+
+  Ejemplo de uso:
+    EXEC dbo.CashflowDataHeaderPivot
          @SemanaInicial = 1,
          @SemanaFinal   = 6,
          @Moneda        = 'COP';
+================================================================================
 */
 
 CREATE OR ALTER FUNCTION dbo.CashflowDataHeader

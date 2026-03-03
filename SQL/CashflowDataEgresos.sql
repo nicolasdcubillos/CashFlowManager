@@ -1,11 +1,39 @@
 /*
-    CashflowDataEgresos
-    Vista y Pivot.
-    
-    EXEC dbo.CashflowDataEgresosPivot 
+================================================================================
+  Archivo      : CashflowDataEgresos.sql
+  Descripcion  : Egresos proyectados del flujo de caja semana a semana.
+                 Incluye pagos a proveedores nacionales y del exterior,
+                 mano de obra de terceros, personal, impuestos y servicios.
+  Autor        : CC Sistemas
+  Fecha        : 2026-03-02
+================================================================================
+
+  FUNCION  dbo.CashflowDataEgresos (@SemanaInicial, @SemanaFinal, @Moneda)
+  -------------------------------------------------------------------------
+  Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto de
+  egreso y por cada semana del rango indicado. Internamente construye:
+    - Numeros / FechaSemana : rango de semanas con sus fechas de inicio y fin.
+    - PagosProveedor        : suma abonos de cuentas por pagar (ABOCXP)
+                              agrupados por tipo de proveedor y exterior,
+                              convirtiendo a COP o USD segun @Moneda.
+    - MovContables          : extrae debitos de nomina (cuentas 51x) e
+                              impuestos (cuentas 24x) desde MVTO.
+  El resultado final es un UNION ALL de doce conceptos de egreso.
+
+  PROCEDIMIENTO  dbo.CashflowDataEgresosPivot (@SemanaInicial, @SemanaFinal, @Moneda)
+  ------------------------------------------------------------------------------------
+  Stored Procedure que transpone la salida de la funcion anterior en una
+  matriz donde cada columna es un numero de semana. Construye dinamicamente
+  la lista de columnas con STRING_AGG/QUOTENAME y ejecuta un PIVOT con
+  SUM(Valor) FOR Semana mediante sp_executesql.
+  El resultado se ordena por nombre de concepto.
+
+  Ejemplo de uso:
+    EXEC dbo.CashflowDataEgresosPivot
          @SemanaInicial = 1,
          @SemanaFinal   = 6,
          @Moneda        = 'COP';
+================================================================================
 */
 
 CREATE OR ALTER FUNCTION dbo.CashflowDataEgresos
@@ -234,3 +262,5 @@ BEGIN
     EXEC sp_executesql @SQL;
 END;
 GO
+
+EXEC dbo.CashflowDataEgresosPivot 4, 6, 'USD'

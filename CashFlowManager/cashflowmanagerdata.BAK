@@ -175,13 +175,13 @@ FUNCTION ArmarEncabezadoCashFlow
         loHoja.Cells(6,lnUltimaColumna) ;
     ).HorizontalAlignment = -4108
 
-    WITH loHoja.Range( ;
-        loHoja.Cells(3,1), ;
-        loHoja.Cells(6,lnUltimaColumna) ;
-    ).Borders
-        .LineStyle = 1
-        .Weight = 2
-    ENDWITH
+*!*	    WITH loHoja.Range( ;
+*!*	        loHoja.Cells(3,1), ;
+*!*	        loHoja.Cells(6,lnUltimaColumna) ;
+*!*	    ).Borders
+*!*	        .LineStyle = 1
+*!*	        .Weight = 2
+*!*	    ENDWITH
 
 ENDFUNC
 
@@ -266,9 +266,6 @@ FUNCTION ArmarDataCashFlow
 	    ALLTRIM(tcMoneda) + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrEgresos")
-    
-    MESSAGEBOX("Ejecutado csrEgresos")
-    MESSAGEBOX(lcSql)
 
     IF lnResult < 0
         AERROR(laError)

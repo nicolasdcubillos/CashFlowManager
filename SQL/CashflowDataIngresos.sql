@@ -1,11 +1,40 @@
 /*
-    CashflowDataIngresos
-    Vista y Pivot.
+================================================================================
+  Archivo      : CashflowDataIngresos.sql
+  Descripcion  : Ingresos proyectados del flujo de caja semana a semana.
+                 Clasifica los ingresos por tipo de cliente: nacionales,
+                 Carvajal, exterior, reverse factoring, prestamos y otros.
+  Autor        : CC Sistemas
+  Fecha        : 2026-03-02
+================================================================================
 
-    EXEC dbo.CashflowDataIngresosPivot 
+  FUNCION  dbo.CashflowDataIngresos (@SemanaInicial, @SemanaFinal, @Moneda)
+  -------------------------------------------------------------------------
+  Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto de
+  ingreso y por cada semana del rango indicado. Internamente construye:
+    - Numeros / FechaSemana : rango de semanas con la fecha de inicio.
+    - TRMSemana             : TRM vigente por semana consultada en MTCAMBIO.
+    - Datos                 : cruza operaciones comerciales (TRADE) con el
+                              maestro de clientes/proveedores (MTPROCLI),
+                              convirtiendo los valores a COP o USD segun
+                              @Moneda y la TRM de cada semana.
+    - Agrupado              : agrupa por tipo de cliente (TIPOCLI) y
+                              exterior para obtener totales por categoria.
+  Retorna nueve conceptos de ingreso mediante UNION ALL.
+
+  PROCEDIMIENTO  dbo.CashflowDataIngresosPivot (@SemanaInicial, @SemanaFinal, @Moneda)
+  -------------------------------------------------------------------------------------
+  Stored Procedure que transpone la salida de la funcion en una matriz
+  donde cada columna es un numero de semana. Construye dinamicamente la
+  lista de columnas con STRING_AGG/QUOTENAME y ejecuta un PIVOT con
+  SUM(Valor) FOR Semana mediante sp_executesql.
+
+  Ejemplo de uso:
+    EXEC dbo.CashflowDataIngresosPivot
          @SemanaInicial = 1,
          @SemanaFinal   = 6,
          @Moneda        = 'COP';
+================================================================================
 */
 
 CREATE OR ALTER FUNCTION dbo.CashflowDataIngresos
