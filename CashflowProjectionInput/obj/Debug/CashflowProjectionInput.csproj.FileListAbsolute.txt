@@ -1,0 +1,10 @@
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\bin\Debug\CashflowProjectionInput.exe.config
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\bin\Debug\CashflowProjectionInput.exe
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\bin\Debug\CashflowProjectionInput.pdb
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.csproj.AssemblyReference.cache
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.Properties.Resources.resources
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.csproj.GenerateResource.cache
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.csproj.CoreCompileInputs.cache
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.exe
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.pdb
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowProjectionInput\obj\Debug\CashflowProjectionInput.exe.config

@@ -1,0 +1,70 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|d:\\nicolasd\\personal\\cc sistemas\\ofimatica\\intecplast\\cashflowmanager\\cashflowprojectioninput\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|d:\\nicolasd\\personal\\cc sistemas\\ofimatica\\intecplast\\cashflowmanager\\cashflowprojectioninput\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|d:\\nicolasd\\personal\\cc sistemas\\ofimatica\\intecplast\\cashflowmanager\\cashflowprojectioninput\\ddl_cashflowprojection.sql||{3B902123-F8A7-4915-9F01-361F908088D0}|",
+      "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:ddl_cashflowprojection.sql||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "Form1.Designer.cs",
+              "ToolTip": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.Designer.cs",
+              "RelativeToolTip": "Form1.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T21:03:46.538Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DDL_CashflowProjection.sql",
+              "DocumentMoniker": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\DDL_CashflowProjection.sql",
+              "RelativeDocumentMoniker": "DDL_CashflowProjection.sql",
+              "ToolTip": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\DDL_CashflowProjection.sql",
+              "RelativeToolTip": "DDL_CashflowProjection.sql",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-03-25T21:02:44.891Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form1.cs [Dise\u00F1o]",
+              "DocumentMoniker": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Form1.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T20:57:32.931Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

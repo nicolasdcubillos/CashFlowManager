@@ -15,8 +15,45 @@
 #DEFINE COLOR_FILA_PAR       15853019   && RGB(219,229,241) - gris claro #DBE5F1, filas pares
 #DEFINE COLOR_FILA_IMPAR     16777215   && RGB(255,255,255) - blanco, filas impares
 #DEFINE COLOR_TOTALES        14341079   && RGB(215,211,218) - lila claro #D7D3DA, seccion totales
+*-----------------------------------------------------------* ENTRY POINT: GenerarCashFlowExcelFecha
+* Recibe fecha final. Lee SemanasAtras/SemanasAdelante de BD.
 *-----------------------------------------------------------
-* FUNCIï¿½N PRINCIPAL
+FUNCTION generarCashFlowExcelFecha
+    LPARAMETERS tdFechaFinal
+
+    LOCAL tnSemanasAtras, tnSemanasAdelante
+
+    tnSemanasAtras    = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAtras",    6)))
+    tnSemanasAdelante = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAdelante", 6)))
+
+    RETURN GenerarCashFlowExcel(tdFechaFinal, tnSemanasAtras, tnSemanasAdelante)
+ENDFUNC
+
+*-----------------------------------------------------------
+* ENTRY POINT: GenerarCashFlowExcelSemana
+* Recibe aÃ±o e ISO semana. Calcula la fecha del lunes de
+* esa semana y delega en GenerarCashFlowExcel.
+*-----------------------------------------------------------
+FUNCTION generarCashFlowExcelSemana
+    LPARAMETERS tnAnio, tnSemana
+
+    LOCAL ldJan4, lnDOW, ldLunesS1, ldFechaFinal
+    LOCAL tnSemanasAtras, tnSemanasAdelante
+
+    * ISO 8601: la semana 1 siempre contiene el 4 de enero.
+    * Encontramos el lunes de esa semana y sumamos (tnSemana-1)*7 dias.
+    ldJan4       = DATE(tnAnio, 1, 4)
+    lnDOW        = DOW(ldJan4, 2)              && 1=Lun ... 7=Dom
+    ldLunesS1    = ldJan4 - (lnDOW - 1)       && Lunes de la ISO semana 1
+    ldFechaFinal = ldLunesS1 + ((tnSemana - 1) * 7)  && Lunes de la semana pedida
+
+    tnSemanasAtras    = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAtras",    6)))
+    tnSemanasAdelante = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAdelante", 6)))
+
+    RETURN GenerarCashFlowExcel(ldFechaFinal, tnSemanasAtras, tnSemanasAdelante)
+ENDFUNC
+
+*-----------------------------------------------------------* FUNCION PRINCIPAL
 * Genera archivo Excel completo (USD y COP)
 *-----------------------------------------------------------
 FUNCTION GenerarCashFlowExcel
@@ -48,7 +85,7 @@ FUNCTION GenerarCashFlowExcel
 
     TRY
 
-        WAIT WINDOW "Inicializando generaciï¿½n de Flujo de Caja..." NOWAIT  && NUEVO
+        WAIT WINDOW "Inicializando generación de Flujo de Caja..." NOWAIT  && NUEVO
 
         * Nombre del archivo de salida
         lcNombreArchivo = "FlujoDeCaja_Intecplast_" + ;
@@ -736,8 +773,36 @@ FUNCTION FormatearHojaBase
 
 ENDFUNC
 
+*-----------------------------------------------------------* LEE VALOR DE CONFIGURACION DESDE CashflowManagerConfig
+* Retorna tnDefault si el registro no existe o hay error.
 *-----------------------------------------------------------
-* OBTENER TRM DESDE SQL SERVER
+FUNCTION LeerConfigCashFlow
+    LPARAMETERS tcConfig, tnDefault
+
+    LOCAL lcSQL, lnResult, luValor
+
+    lcSQL    = "SELECT Value FROM dbo.CashflowManagerConfig WHERE Config = '" + ALLTRIM(tcConfig) + "'"
+    lnResult = SQLEXEC(ON, lcSQL, "csrCfg")
+
+    IF lnResult <= 0
+        IF USED("csrCfg")
+            USE IN csrCfg
+        ENDIF
+        THROW "LeerConfigCashFlow: error al consultar la configuracion '" + ALLTRIM(tcConfig) + "' (SQLEXEC=" + TRANSFORM(lnResult) + ")"
+    ENDIF
+
+    SELECT csrCfg
+    luValor = ALLTRIM(NVL(csrCfg.Value, ""))
+    USE IN csrCfg
+
+    IF !EMPTY(luValor)
+        RETURN luValor
+    ENDIF
+
+    RETURN tnDefault
+ENDFUNC
+
+*-----------------------------------------------------------* OBTENER TRM DESDE SQL SERVER
 * Devuelve la TRM para una fecha especï¿½fica.
 *-----------------------------------------------------------
 FUNCTION ObtenerTRM

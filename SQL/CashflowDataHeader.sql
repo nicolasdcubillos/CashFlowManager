@@ -210,18 +210,3 @@ BEGIN
 
 END
 GO
-
-EXEC dbo.CashflowDataHeaderPivot 
-     @SemanaInicial = 1,
-     @SemanaFinal   = 8,
-     @Moneda        = 'COP';
-
-
-    SELECT * from mtprioc
-
-    SP_HELP MTPROCLI
-
-    SELECT * FROM TIPOCL
-
-    REFERENCES COLFUTURO.dbo.TIPOCL (CODTIPOCL)
-
