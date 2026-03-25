@@ -222,9 +222,9 @@
             rightStyle.SelectionForeColor = System.Drawing.Color.White;
             this.colTotal.DataPropertyName = "TotalProjected";
             this.colTotal.DefaultCellStyle = rightStyle;
-            this.colTotal.FillWeight       = 130F;
+            this.colTotal.FillWeight       = 80F;
             this.colTotal.HeaderText       = "Total Proyectado";
-            this.colTotal.MinimumWidth     = 130;
+            this.colTotal.MinimumWidth     = 90;
             this.colTotal.Name             = "colTotal";
 
             // ── dgvProjection ──────────────────────────────────────────────
@@ -249,7 +249,7 @@
             this.dgvProjection.MultiSelect                     = false;
             this.dgvProjection.Name                            = "dgvProjection";
             this.dgvProjection.RowHeadersVisible               = false;
-            this.dgvProjection.RowTemplate.Height              = 32;
+            this.dgvProjection.RowTemplate.Height              = 26;
             this.dgvProjection.SelectionMode                   = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvProjection.TabIndex                        = 0;
 
@@ -282,7 +282,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor           = System.Drawing.Color.FromArgb(240, 247, 253);
-            this.ClientSize          = new System.Drawing.Size(900, 560);
+            this.ClientSize          = new System.Drawing.Size(1050, 650);
             this.Controls.Add(this.pnlGrid);
             this.Controls.Add(this.pnlFooter);
             this.Controls.Add(this.pnlToolbar);
