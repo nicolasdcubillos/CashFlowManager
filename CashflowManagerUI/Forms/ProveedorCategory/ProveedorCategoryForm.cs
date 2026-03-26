@@ -15,6 +15,8 @@ namespace CashFlowManager.UI
     public class ProveedorCategoryForm : BaseProjectionForm
     {
         private DataTable _categories;
+        private DataTable _categoriesEgresos;
+        private DataTable _categoriesIngresos;
         private TextBox   _txtFiltro;
         private ComboBox  _cmbTipo;
 
@@ -24,7 +26,7 @@ namespace CashFlowManager.UI
             ConfigurationManager.ConnectionStrings["CashflowDB"].ConnectionString;
 
         protected override string SelectSql =>
-            "SELECT p.NIT, RTRIM(LTRIM(p.NOMBRE)) AS NOMBRE, p.CashflowCategoryId " +
+            "SELECT p.NIT, RTRIM(LTRIM(p.NOMBRE)) AS NOMBRE, p.ESPROVEE, p.ESCLIENTE, p.CashflowCategoryId " +
             "FROM dbo.MTPROCLI p " +
             "ORDER BY p.NOMBRE";
 
@@ -94,6 +96,7 @@ namespace CashFlowManager.UI
 
             Dgv.Columns.AddRange(colNit, colNombre, colCategoria);
             Dgv.EditMode = DataGridViewEditMode.EditOnEnter;
+            Dgv.EditingControlShowing += Dgv_EditingControlShowing;
         }
 
         protected override DataTable ConstruirTablaVacia()
@@ -101,6 +104,8 @@ namespace CashFlowManager.UI
             var dt = new DataTable();
             dt.Columns.Add("NIT",                 typeof(string));
             dt.Columns.Add("NOMBRE",              typeof(string));
+            dt.Columns.Add("ESPROVEE",            typeof(string));
+            dt.Columns.Add("ESCLIENTE",           typeof(string));
             dt.Columns.Add("CashflowCategoryId",  typeof(string));
             foreach (DataColumn col in dt.Columns) col.AllowDBNull = true;
             return dt;
@@ -243,14 +248,39 @@ namespace CashFlowManager.UI
             Table.AcceptChanges();
         }
 
+        private void Dgv_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (Dgv.CurrentCell?.OwningColumn?.Name != "colCategoria") return;
+            if (!(e.Control is ComboBox cmb)) return;
+
+            var drv = Dgv.CurrentRow?.DataBoundItem as DataRowView;
+            if (drv == null) return;
+
+            string esProvee  = drv.Row["ESPROVEE"]?.ToString().Trim().ToUpper() ?? "";
+            string esCliente = drv.Row["ESCLIENTE"]?.ToString().Trim().ToUpper() ?? "";
+
+            DataTable source;
+            if (esProvee == "S" && esCliente == "S")
+                source = _categories;
+            else if (esProvee == "S")
+                source = _categoriesEgresos;
+            else
+                source = _categoriesIngresos;
+
+            object currentValue = Dgv.CurrentCell.Value;
+            cmb.DataSource    = source;
+            cmb.ValueMember   = "Id";
+            cmb.DisplayMember = "Display";
+
+            if (currentValue != null && currentValue != DBNull.Value)
+                cmb.SelectedValue = currentValue;
+        }
+
         private void CargarCategorias()
         {
-            _categories = new DataTable();
-            _categories.Columns.Add("Id",      typeof(string));
-            _categories.Columns.Add("Display", typeof(string));
-
-            // Fila vacía para permitir "sin categoría"
-            _categories.Rows.Add(DBNull.Value, "(Sin categoría)");
+            _categories         = CrearTablaCategorias();
+            _categoriesEgresos  = CrearTablaCategorias();
+            _categoriesIngresos = CrearTablaCategorias();
 
             try
             {
@@ -265,10 +295,17 @@ namespace CashFlowManager.UI
                     {
                         while (reader.Read())
                         {
-                            string id     = reader["Id"].ToString().Trim();
-                            string cat    = reader["Category"].ToString().Trim();
-                            string parent = reader["ParentName"].ToString().Trim();
-                            _categories.Rows.Add(id, $"{cat} — {parent}");
+                            string id      = reader["Id"].ToString().Trim();
+                            string cat     = reader["Category"].ToString().Trim();
+                            string parent  = reader["ParentName"].ToString().Trim();
+                            string display = $"{cat} — {parent}";
+
+                            _categories.Rows.Add(id, display);
+
+                            if (cat == "EGRESOS")
+                                _categoriesEgresos.Rows.Add(id, display);
+                            else if (cat == "INGRESOS")
+                                _categoriesIngresos.Rows.Add(id, display);
                         }
                     }
                 }
@@ -277,6 +314,15 @@ namespace CashFlowManager.UI
             {
                 ShowError("Error al cargar categorías:\n\n" + ex.Message, "Error");
             }
+        }
+
+        private static DataTable CrearTablaCategorias()
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("Id",      typeof(string));
+            dt.Columns.Add("Display", typeof(string));
+            dt.Rows.Add(DBNull.Value, "(Sin categoría)");
+            return dt;
         }
     }
 }
