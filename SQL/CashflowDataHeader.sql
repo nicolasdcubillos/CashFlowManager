@@ -1,3 +1,6 @@
+USE INTECPL;
+GO
+
 /*
 ================================================================================
   Archivo      : CashflowDataHeader.sql
@@ -25,19 +28,7 @@
   Retorna cuatro conceptos: Saldo inicial COP, Saldo inicial USD,
   PA Credicorp - Excedentes y Disponible Bancos.
 
-  PROCEDIMIENTO  dbo.CashflowDataHeaderPivot (@SemanaInicial, @SemanaFinal, @Moneda)
-  -----------------------------------------------------------------------------------
-  Stored Procedure que transpone la salida de la funcion en una matriz
-  donde cada columna es un numero de semana. Construye dinamicamente la
-  lista de columnas y ejecuta un PIVOT con SUM(Valor) FOR Semana mediante
-  sp_executesql. El resultado se ordena con CASE segun el orden logico
-  de los conceptos del encabezado.
-
-  Ejemplo de uso:
-    EXEC dbo.CashflowDataHeaderPivot
-         @SemanaInicial = 1,
-         @SemanaFinal   = 6,
-         @Moneda        = 'COP';
+  PIVOT: usar dbo.CashflowPivot con @FunctionName = 'CashflowDataHeader'.
 ================================================================================
 */
 
@@ -45,7 +36,8 @@ CREATE OR ALTER FUNCTION dbo.CashflowDataHeader
 (
     @SemanaInicial INT,
     @SemanaFinal   INT,
-    @Moneda        VARCHAR(3)
+    @Moneda        VARCHAR(3),
+    @FechaBase     DATE = NULL   -- NULL usa GETDATE() (llamada directa / retrocompatible)
 )
 RETURNS TABLE
 AS
@@ -64,7 +56,7 @@ RETURN
     (
         SELECT 
             Semana,
-            DATEADD(WEEK, Semana, CAST(GETDATE() AS DATE)) AS FechaInicio
+            DATEADD(WEEK, Semana, ISNULL(@FechaBase, CAST(GETDATE() AS DATE))) AS FechaInicio
         FROM Numeros
     ),
 
@@ -113,6 +105,7 @@ RETURN
 
     -- Saldo COP: si piden USD se divide por TRM
     SELECT 'Saldo inicial COP' AS Concepto,
+           1                   AS ItemOrder,
            Semana,
            CASE WHEN @Moneda = 'USD'
                 THEN SaldoCOP / NULLIF(TRM, 0)
@@ -124,6 +117,7 @@ RETURN
 
     -- Saldo USD: si piden COP se multiplica por TRM
     SELECT 'Saldo inicial USD',
+           2,
            Semana,
            CASE WHEN @Moneda = 'USD'
                 THEN SaldoUSD
@@ -135,6 +129,7 @@ RETURN
 
     -- Prestamos: conversion limpia separando COP y USD
     SELECT 'PA Credicorp - Excedentes',
+           3,
            Semana,
            CASE WHEN @Moneda = 'USD'
                 THEN PrestamosCOP / NULLIF(TRM, 0) + PrestamosUSD
@@ -146,6 +141,7 @@ RETURN
 
     -- Disponible total: suma homogenea en la moneda pedida
     SELECT 'Disponible Bancos',
+           4,
            Semana,
            CASE WHEN @Moneda = 'USD'
                 THEN SaldoCOP / NULLIF(TRM, 0) + SaldoUSD
@@ -153,60 +149,4 @@ RETURN
            END
     FROM Saldos
 )
-GO
-
-CREATE OR ALTER PROCEDURE dbo.CashflowDataHeaderPivot
-(
-    @SemanaInicial INT,
-    @SemanaFinal   INT,
-    @Moneda        VARCHAR(3)
-)
-AS
-BEGIN
-
-    SET NOCOUNT ON;
-
-    DECLARE @Columnas NVARCHAR(MAX)
-    DECLARE @SQL NVARCHAR(MAX)
-
-    ;WITH Numeros AS
-    (
-        SELECT @SemanaInicial AS Semana
-        UNION ALL
-        SELECT Semana + 1
-        FROM Numeros
-        WHERE Semana + 1 <= @SemanaFinal
-    )
-    SELECT @Columnas = STRING_AGG(QUOTENAME(Semana), ',')
-    FROM Numeros
-    OPTION (MAXRECURSION 1000)
-
-    SET @SQL = '
-        SELECT *
-        FROM
-        (
-            SELECT Concepto, Semana, Valor
-            FROM dbo.CashflowDataHeader('
-            + CAST(@SemanaInicial AS VARCHAR) + ','
-            + CAST(@SemanaFinal AS VARCHAR) + ','''
-            + @Moneda + ''')
-        ) src
-        PIVOT
-        (
-            SUM(Valor)
-            FOR Semana IN (' + @Columnas + ')
-        ) p
-        ORDER BY
-            CASE Concepto
-                WHEN ''Saldo inicial COP'' THEN 1
-                WHEN ''Saldo inicial USD'' THEN 2
-                WHEN ''PA Credicorp - Excedentes'' THEN 3
-                WHEN ''Disponible Bancos'' THEN 4
-                ELSE 99
-            END
-    '
-
-    EXEC sp_executesql @SQL
-
-END
 GO

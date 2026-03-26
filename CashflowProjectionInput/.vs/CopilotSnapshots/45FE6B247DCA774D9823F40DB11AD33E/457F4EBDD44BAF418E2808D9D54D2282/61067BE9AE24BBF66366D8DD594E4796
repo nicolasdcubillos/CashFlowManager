@@ -1,0 +1,143 @@
+﻿using System;
+using System.Configuration;
+using System.Data;
+using System.Data.Odbc;
+using System.Windows.Forms;
+
+namespace CashflowProjectionInput
+{
+    public partial class Form1 : BaseProjectionForm
+    {
+        // ── Contrato ──────────────────────────────────────────────────
+        protected override string TituloVentana => "Flujo de Caja \u2014 Proyectado";
+
+        protected override string ConnStr =>
+            ConfigurationManager.ConnectionStrings["CashflowDB"].ConnectionString;
+
+        protected override string SelectSql =>
+            "SELECT NIT, [Year], [Week], TotalProjected " +
+            "FROM dbo.CashflowProjection " +
+            "ORDER BY NIT, [Year], [Week]";
+
+        protected override string SaveSql =>
+            "SELECT NIT, [Year], [Week], TotalProjected FROM dbo.CashflowProjection";
+
+        public Form1() { }
+
+        // ── Columnas específicas de esta pantalla ─────────────────────
+        protected override void ConfigurarColumnas()
+        {
+            var selStyle = new DataGridViewCellStyle
+            {
+                SelectionBackColor = System.Drawing.Color.FromArgb(219, 234, 254),
+                SelectionForeColor = System.Drawing.Color.FromArgb(17, 24, 39)
+            };
+            var centerStyle = new DataGridViewCellStyle(selStyle)
+            {
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            };
+            var rightStyle = new DataGridViewCellStyle(selStyle)
+            {
+                Alignment = DataGridViewContentAlignment.MiddleRight,
+                Format    = "N2"
+            };
+
+            Dgv.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn { DataPropertyName = "NIT",            HeaderText = "NIT",            Name = "colNIT",    FillWeight = 130F, MinimumWidth = 120, MaxInputLength = 20 },
+                new DataGridViewTextBoxColumn { DataPropertyName = "Year",           HeaderText = "A\u00f1o",       Name = "colAnio",   FillWeight =  60F, MinimumWidth =  70, MaxInputLength =  4, DefaultCellStyle = centerStyle },
+                new DataGridViewTextBoxColumn { DataPropertyName = "Week",           HeaderText = "Semana",        Name = "colSemana", FillWeight =  60F, MinimumWidth =  70, MaxInputLength =  2, DefaultCellStyle = centerStyle },
+                new DataGridViewTextBoxColumn { DataPropertyName = "TotalProjected", HeaderText = "Total Proyectado", Name = "colTotal", FillWeight =  80F, MinimumWidth =  90, DefaultCellStyle = rightStyle }
+            });
+        }
+
+        protected override DataTable ConstruirTablaVacia()
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("NIT",            typeof(string));
+            dt.Columns.Add("Year",           typeof(short));
+            dt.Columns.Add("Week",           typeof(byte));
+            dt.Columns.Add("TotalProjected", typeof(decimal));
+            foreach (DataColumn col in dt.Columns) col.AllowDBNull = true;
+            return dt;
+        }
+
+        protected override void ValidarFila(DataRow row, System.Text.StringBuilder errores)
+        {
+            if (row["Year"] == DBNull.Value ||
+                !short.TryParse(row["Year"].ToString(), out short anio) ||
+                anio < 2000 || anio > 3000)
+            {
+                errores.AppendLine($"  \u2022 NIT '{row["NIT"]}': A\u00f1o '{row["Year"]}' inv\u00e1lido (debe estar entre 2000 y 3000).");
+            }
+
+            if (row["Week"] == DBNull.Value ||
+                !byte.TryParse(row["Week"].ToString(), out byte semana))
+            {
+                errores.AppendLine($"  \u2022 NIT '{row["NIT"]}': Semana inv\u00e1lida.");
+            }
+            else if (row["Year"] != DBNull.Value &&
+                     short.TryParse(row["Year"].ToString(), out short anioSem) &&
+                     anioSem >= 2000 && anioSem <= 3000)
+            {
+                int max = IsoWeeksInYear(anioSem);
+                if (semana < 1 || semana > max)
+                    errores.AppendLine($"  \u2022 NIT '{row["NIT"]}': Semana {semana} inv\u00e1lida para el a\u00f1o {anioSem} (m\u00e1x. {max}).");
+            }
+        }
+
+        // ── Popup NIT al presionar Enter en celda vacía ────────────────
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Enter && (Dgv.Focused || Dgv.IsCurrentCellInEditMode))
+            {
+                if (Dgv.CurrentCell == null)
+                    return base.ProcessCmdKey(ref msg, keyData);
+
+                if (Dgv.CurrentCell.OwningColumn.Name == "colNIT")
+                {
+                    string texto = Dgv.IsCurrentCellInEditMode && Dgv.EditingControl != null
+                        ? Dgv.EditingControl.Text?.Trim() ?? ""
+                        : Dgv.CurrentCell.Value?.ToString()?.Trim() ?? "";
+
+                    if (string.IsNullOrEmpty(texto))
+                    {
+                        Dgv.EndEdit();
+                        using (var popup = new ProveedorLookupForm(ConnStr))
+                        {
+                            if (popup.ShowDialog(this) == DialogResult.OK)
+                                Dgv.CurrentCell.Value = popup.NitSeleccionado;
+                        }
+                    }
+                }
+
+                MoverSiguienteCelda();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void MoverSiguienteCelda()
+        {
+            Dgv.EndEdit();
+            int col = Dgv.CurrentCell.ColumnIndex;
+            int row = Dgv.CurrentCell.RowIndex;
+
+            if (col + 1 < Dgv.ColumnCount)
+                Dgv.CurrentCell = Dgv.Rows[row].Cells[col + 1];
+            else if (row + 1 < Dgv.Rows.Count)
+                Dgv.CurrentCell = Dgv.Rows[row + 1].Cells[0];
+        }
+
+
+
+        private static int IsoWeeksInYear(int year)
+        {
+            var jan1  = new DateTime(year, 1, 1);
+            var dec31 = new DateTime(year, 12, 31);
+            return (jan1.DayOfWeek == DayOfWeek.Thursday || dec31.DayOfWeek == DayOfWeek.Thursday)
+                ? 53 : 52;
+        }
+        }
+    }
+}

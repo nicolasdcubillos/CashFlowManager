@@ -24,9 +24,10 @@ namespace CashflowProjectionInput
         private          BindingSource _bs = new BindingSource();
 
         private const string QuerySql =
-            "SELECT NIT, RTRIM(LTRIM(NOMBRE)) AS NOMBRE, TIPOCLI " +
-            "FROM dbo.MTPROCLI " +
-            "ORDER BY NOMBRE";
+            "SELECT m.NIT, RTRIM(LTRIM(m.NOMBRE)) AS NOMBRE, ISNULL(c.ParentName, '') AS ParentName " +
+            "FROM dbo.MTPROCLI m " +
+            "LEFT JOIN dbo.CashflowCategory c ON c.Id = m.CashflowCategoryId " +
+            "ORDER BY m.NOMBRE";
 
         // ────────────────────────────────────────────────────────────────
         // Constructor
@@ -86,7 +87,7 @@ namespace CashflowProjectionInput
                 _allData.DefaultView.RowFilter =
                     $"NIT LIKE '%{filter}%' OR " +
                     $"NOMBRE LIKE '%{filter}%' OR " +
-                    $"TIPOCLI LIKE '%{filter}%'";
+                    $"ParentName LIKE '%{filter}%'";
             }
 
             lblConteo.Text = $"{_allData.DefaultView.Count} registro(s)";

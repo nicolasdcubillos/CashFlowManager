@@ -64,27 +64,27 @@ namespace CashflowProjectionInput
 
             // ── lblBuscar ─────────────────────────────────────────────
             this.lblBuscar.AutoSize  = true;
-            this.lblBuscar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblBuscar.ForeColor = System.Drawing.Color.FromArgb(52, 101, 153);
-            this.lblBuscar.Location  = new System.Drawing.Point(12, 14);
+            this.lblBuscar.Font      = new System.Drawing.Font("Segoe UI", 8.75F);
+            this.lblBuscar.ForeColor = System.Drawing.Color.FromArgb(107, 114, 128);
+            this.lblBuscar.Location  = new System.Drawing.Point(14, 14);
             this.lblBuscar.TabIndex  = 0;
             this.lblBuscar.Text      = "Buscar:";
 
             // ── txtBuscar ─────────────────────────────────────────────
             this.txtBuscar.BorderStyle        = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtBuscar.Font               = new System.Drawing.Font("Segoe UI", 10F);
-            this.txtBuscar.ForeColor          = System.Drawing.Color.FromArgb(35, 40, 55);
+            this.txtBuscar.Font               = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtBuscar.ForeColor          = System.Drawing.Color.FromArgb(31, 41, 55);
             this.txtBuscar.Location           = new System.Drawing.Point(72, 10);
             this.txtBuscar.Name               = "txtBuscar";
-            this.txtBuscar.Size               = new System.Drawing.Size(380, 28);
+            this.txtBuscar.Size               = new System.Drawing.Size(380, 26);
             this.txtBuscar.TabIndex           = 1;
             this.txtBuscar.TextChanged       += new System.EventHandler(this.txtBuscar_TextChanged);
             this.txtBuscar.KeyDown           += new System.Windows.Forms.KeyEventHandler(this.txtBuscar_KeyDown);
 
             // ── lblConteo ─────────────────────────────────────────────
             this.lblConteo.AutoSize  = false;
-            this.lblConteo.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Italic);
-            this.lblConteo.ForeColor = System.Drawing.Color.FromArgb(74, 125, 182);
+            this.lblConteo.Font      = new System.Drawing.Font("Segoe UI", 8.25F);
+            this.lblConteo.ForeColor = System.Drawing.Color.FromArgb(156, 163, 175);
             this.lblConteo.Location  = new System.Drawing.Point(464, 13);
             this.lblConteo.Size      = new System.Drawing.Size(190, 24);
             this.lblConteo.TabIndex  = 2;
@@ -92,7 +92,7 @@ namespace CashflowProjectionInput
             this.lblConteo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 
             // ── pnlSearch ─────────────────────────────────────────────
-            this.pnlSearch.BackColor = System.Drawing.Color.FromArgb(214, 233, 247);
+            this.pnlSearch.BackColor = System.Drawing.Color.FromArgb(249, 250, 251);
             this.pnlSearch.Controls.Add(this.lblConteo);
             this.pnlSearch.Controls.Add(this.txtBuscar);
             this.pnlSearch.Controls.Add(this.lblBuscar);
@@ -103,22 +103,22 @@ namespace CashflowProjectionInput
             // ── Estilos grilla ────────────────────────────────────────
             var headerStyle = new System.Windows.Forms.DataGridViewCellStyle();
             headerStyle.Alignment  = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            headerStyle.BackColor  = System.Drawing.Color.FromArgb(143, 185, 222);
-            headerStyle.Font       = new System.Drawing.Font("Segoe UI", 9.25F, System.Drawing.FontStyle.Bold);
-            headerStyle.ForeColor  = System.Drawing.Color.FromArgb(22, 54, 92);
-            headerStyle.Padding    = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            headerStyle.BackColor  = System.Drawing.Color.FromArgb(243, 244, 246);
+            headerStyle.Font       = new System.Drawing.Font("Segoe UI Semibold", 8.75F);
+            headerStyle.ForeColor  = System.Drawing.Color.FromArgb(55, 65, 81);
+            headerStyle.Padding    = new System.Windows.Forms.Padding(6, 0, 0, 0);
 
             var cellStyle = new System.Windows.Forms.DataGridViewCellStyle();
             cellStyle.BackColor          = System.Drawing.Color.White;
-            cellStyle.Font               = new System.Drawing.Font("Segoe UI", 9.25F);
-            cellStyle.ForeColor          = System.Drawing.Color.FromArgb(35, 40, 55);
-            cellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(74, 125, 182);
-            cellStyle.SelectionForeColor = System.Drawing.Color.White;
+            cellStyle.Font               = new System.Drawing.Font("Segoe UI", 9F);
+            cellStyle.ForeColor          = System.Drawing.Color.FromArgb(31, 41, 55);
+            cellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(219, 234, 254);
+            cellStyle.SelectionForeColor = System.Drawing.Color.FromArgb(17, 24, 39);
 
             var altRowStyle = new System.Windows.Forms.DataGridViewCellStyle();
-            altRowStyle.BackColor          = System.Drawing.Color.FromArgb(232, 244, 253);
-            altRowStyle.SelectionBackColor = System.Drawing.Color.FromArgb(74, 125, 182);
-            altRowStyle.SelectionForeColor = System.Drawing.Color.White;
+            altRowStyle.BackColor          = System.Drawing.Color.FromArgb(249, 250, 251);
+            altRowStyle.SelectionBackColor = System.Drawing.Color.FromArgb(219, 234, 254);
+            altRowStyle.SelectionForeColor = System.Drawing.Color.FromArgb(17, 24, 39);
 
             // ── Columnas ──────────────────────────────────────────────
             // colPNIT
@@ -138,10 +138,10 @@ namespace CashflowProjectionInput
             this.colPNombre.ReadOnly         = true;
 
             // colPTipoCli
-            this.colPTipoCli.DataPropertyName = "TIPOCLI";
-            this.colPTipoCli.FillWeight       = 100F;
-            this.colPTipoCli.HeaderText       = "Tipo";
-            this.colPTipoCli.MinimumWidth     = 80;
+            this.colPTipoCli.DataPropertyName = "ParentName";
+            this.colPTipoCli.FillWeight       = 200F;
+            this.colPTipoCli.HeaderText       = "Categoría";
+            this.colPTipoCli.MinimumWidth     = 140;
             this.colPTipoCli.Name             = "colPTipoCli";
             this.colPTipoCli.ReadOnly         = true;
 
@@ -152,12 +152,12 @@ namespace CashflowProjectionInput
             this.dgvProveedores.AlternatingRowsDefaultCellStyle = altRowStyle;
             this.dgvProveedores.AutoGenerateColumns             = false;
             this.dgvProveedores.AutoSizeColumnsMode             = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvProveedores.BackgroundColor                 = System.Drawing.Color.FromArgb(240, 247, 253);
+            this.dgvProveedores.BackgroundColor                 = System.Drawing.Color.White;
             this.dgvProveedores.BorderStyle                     = System.Windows.Forms.BorderStyle.None;
             this.dgvProveedores.CellBorderStyle                 = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.dgvProveedores.ColumnHeadersBorderStyle        = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             this.dgvProveedores.ColumnHeadersDefaultCellStyle   = headerStyle;
-            this.dgvProveedores.ColumnHeadersHeight             = 36;
+            this.dgvProveedores.ColumnHeadersHeight             = 34;
             this.dgvProveedores.ColumnHeadersHeightSizeMode     = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.dgvProveedores.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[]
             {
@@ -166,68 +166,68 @@ namespace CashflowProjectionInput
             this.dgvProveedores.DefaultCellStyle            = cellStyle;
             this.dgvProveedores.Dock                        = System.Windows.Forms.DockStyle.Fill;
             this.dgvProveedores.EnableHeadersVisualStyles   = false;
-            this.dgvProveedores.GridColor                   = System.Drawing.Color.FromArgb(183, 211, 234);
+            this.dgvProveedores.GridColor                   = System.Drawing.Color.FromArgb(229, 231, 235);
             this.dgvProveedores.MultiSelect                 = false;
             this.dgvProveedores.Name                        = "dgvProveedores";
             this.dgvProveedores.ReadOnly                    = true;
             this.dgvProveedores.RowHeadersVisible           = false;
-            this.dgvProveedores.RowTemplate.Height          = 30;
+            this.dgvProveedores.RowTemplate.Height          = 28;
             this.dgvProveedores.SelectionMode               = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvProveedores.TabIndex                    = 0;
             this.dgvProveedores.CellDoubleClick            += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvProveedores_CellDoubleClick);
             this.dgvProveedores.KeyDown                    += new System.Windows.Forms.KeyEventHandler(this.dgvProveedores_KeyDown);
 
             // ── pnlGrid ───────────────────────────────────────────────
-            this.pnlGrid.BackColor = System.Drawing.Color.FromArgb(240, 247, 253);
+            this.pnlGrid.BackColor = System.Drawing.Color.White;
             this.pnlGrid.Controls.Add(this.dgvProveedores);
             this.pnlGrid.Dock      = System.Windows.Forms.DockStyle.Fill;
-            this.pnlGrid.Padding   = new System.Windows.Forms.Padding(8, 6, 8, 6);
+            this.pnlGrid.Padding   = new System.Windows.Forms.Padding(12, 6, 12, 6);
             this.pnlGrid.TabIndex  = 2;
 
             // ── btnSeleccionar ────────────────────────────────────────
             this.btnSeleccionar.Anchor                        = System.Windows.Forms.AnchorStyles.Right;
-            this.btnSeleccionar.BackColor                     = System.Drawing.Color.FromArgb(52, 101, 153);
+            this.btnSeleccionar.BackColor                     = System.Drawing.Color.FromArgb(30, 58, 95);
             this.btnSeleccionar.Cursor                        = System.Windows.Forms.Cursors.Hand;
             this.btnSeleccionar.FlatAppearance.BorderSize     = 0;
             this.btnSeleccionar.FlatStyle                     = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSeleccionar.Font                          = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnSeleccionar.Font                          = new System.Drawing.Font("Segoe UI", 8.75F);
             this.btnSeleccionar.ForeColor                     = System.Drawing.Color.White;
-            this.btnSeleccionar.Location                      = new System.Drawing.Point(452, 9);
+            this.btnSeleccionar.Location                      = new System.Drawing.Point(458, 11);
             this.btnSeleccionar.Name                          = "btnSeleccionar";
-            this.btnSeleccionar.Size                          = new System.Drawing.Size(110, 32);
+            this.btnSeleccionar.Size                          = new System.Drawing.Size(100, 28);
             this.btnSeleccionar.TabIndex                      = 0;
-            this.btnSeleccionar.Text                          = "✔  Seleccionar";
+            this.btnSeleccionar.Text                          = "Seleccionar";
             this.btnSeleccionar.UseVisualStyleBackColor       = false;
             this.btnSeleccionar.Click                        += new System.EventHandler(this.btnSeleccionar_Click);
 
             // ── btnCancelar ───────────────────────────────────────────
             this.btnCancelar.Anchor                        = System.Windows.Forms.AnchorStyles.Right;
-            this.btnCancelar.BackColor                     = System.Drawing.Color.FromArgb(140, 140, 150);
+            this.btnCancelar.BackColor                     = System.Drawing.Color.FromArgb(229, 231, 235);
             this.btnCancelar.Cursor                        = System.Windows.Forms.Cursors.Hand;
             this.btnCancelar.FlatAppearance.BorderSize     = 0;
             this.btnCancelar.FlatStyle                     = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelar.Font                          = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnCancelar.ForeColor                     = System.Drawing.Color.White;
-            this.btnCancelar.Location                      = new System.Drawing.Point(570, 9);
+            this.btnCancelar.Font                          = new System.Drawing.Font("Segoe UI", 8.75F);
+            this.btnCancelar.ForeColor                     = System.Drawing.Color.FromArgb(55, 65, 81);
+            this.btnCancelar.Location                      = new System.Drawing.Point(566, 11);
             this.btnCancelar.Name                          = "btnCancelar";
-            this.btnCancelar.Size                          = new System.Drawing.Size(98, 32);
+            this.btnCancelar.Size                          = new System.Drawing.Size(96, 28);
             this.btnCancelar.TabIndex                      = 1;
-            this.btnCancelar.Text                          = "✕  Cancelar";
+            this.btnCancelar.Text                          = "Cancelar";
             this.btnCancelar.UseVisualStyleBackColor       = false;
             this.btnCancelar.Click                        += new System.EventHandler(this.btnCancelar_Click);
 
             // ── pnlFooter ─────────────────────────────────────────────
-            this.pnlFooter.BackColor = System.Drawing.Color.FromArgb(214, 233, 247);
+            this.pnlFooter.BackColor = System.Drawing.Color.FromArgb(249, 250, 251);
             this.pnlFooter.Controls.Add(this.btnSeleccionar);
             this.pnlFooter.Controls.Add(this.btnCancelar);
             this.pnlFooter.Dock      = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlFooter.Size      = new System.Drawing.Size(680, 50);
+            this.pnlFooter.Size      = new System.Drawing.Size(680, 48);
             this.pnlFooter.TabIndex  = 3;
 
             // ── Form ──────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor           = System.Drawing.Color.FromArgb(240, 247, 253);
+            this.BackColor           = System.Drawing.Color.White;
             this.ClientSize          = new System.Drawing.Size(680, 500);
             this.Controls.Add(this.pnlGrid);
             this.Controls.Add(this.pnlFooter);

@@ -1,15 +1,12 @@
 ﻿namespace CashflowProjectionInput
 {
+    // La UI se construye en BaseProjectionForm.BuildUI().
+    // Este archivo se mantiene como partial para compatibilidad con el proyecto.
     partial class Form1
     {
-        private System.ComponentModel.IContainer components = null;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-                components.Dispose();
-            base.Dispose(disposing);
-        }
+        protected override void Dispose(bool disposing) => base.Dispose(disposing);
+    }
+}
 
         #region Windows Form Designer generated code
 

@@ -119,11 +119,12 @@ FUNCTION GenerarCashFlowExcel
 
         WAIT WINDOW "Consultando y dibujando datos USD..." NOWAIT  && NUEVO
 
-        * SQL historico: desde -tnSemanasAtras hasta la semana actual (0)
+        * SQL historico + proyectado
         IF NOT ArmarDataCashFlowHistorico(loHojaUSD, ;
                                           -tnSemanasAtras, ;
                                           0, ;
-                                          "USD")
+                                          "USD", ;
+                                          tnSemanasAdelante)
             RETURN .F.
         ENDIF
 
@@ -199,11 +200,12 @@ FUNCTION CrearHojaCashFlow
                             tnSemanasAdelante)
 
     WAIT WINDOW "Consultando y dibujando datos " + tcMoneda + "..." NOWAIT
-    * SQL historico: desde -tnSemanasAtras hasta la semana actual (0)
+    * SQL historico + proyectado
     IF NOT ArmarDataCashFlowHistorico(loHoja, ;
                                       -tnSemanasAtras, ;
                                       0, ;
-                                      tcMoneda)
+                                      tcMoneda, ;
+                                      tnSemanasAdelante)
         RETURN .F.
     ENDIF
 
@@ -315,17 +317,19 @@ ENDFUNC
 
 
 *-----------------------------------------------------------
-* 2-8) ARMA DATA HISTORICA
-* Ejecuta vistas SQL (solo historico) y dibuja Header,
-* Ingresos, Egresos, Flujo Economico, Subtotales y Flujo Neto.
-* tnSemanaInicial : numero negativo (ej. -5 = 5 semanas atras)
-* tnSemanaFinal   : 0 = semana actual (no consulta futuro)
+* 2-8) ARMA DATA: HISTORICA + PROYECTADA
+* Ejecuta vistas SQL y dibuja Header, Ingresos, Egresos,
+* Flujo Economico, Subtotales y Flujo Neto.
+* tnSemanaInicial   : numero negativo (ej. -5 = 5 semanas atras)
+* tnSemanaFinal     : 0 = semana actual
+* tnSemanasAdelante : semanas futuras a proyectar (0 = sin proyeccion)
 *-----------------------------------------------------------
 FUNCTION ArmarDataCashFlowHistorico
     LPARAMETERS loHoja, ;
                 tnSemanaInicial, ;
                 tnSemanaFinal, ;
-                tcMoneda
+                tcMoneda, ;
+                tnSemanasAdelante
 
     LOCAL lnFilaActual
     LOCAL lnFilaInicioIngresos, lnFilaFinIngresos
@@ -333,6 +337,15 @@ FUNCTION ArmarDataCashFlowHistorico
     LOCAL lnFilaInicioFlujoEco, lnFilaFinFlujoEco
     LOCAL lnTmpCol, lnUltimaColData
     LOCAL lcSQL, lnResult, laError[1]
+    LOCAL lnColProy
+
+    IF PCOUNT() < 5
+        tnSemanasAdelante = 0
+    ENDIF
+
+    * Columna Excel donde comienza la proyeccion
+    * Columnas historicas: 3 hasta 3 + ABS(tnSemanaInicial)
+    lnColProy = 3 + ABS(tnSemanaInicial) + 1
 
     lnFilaActual = 8
     
@@ -342,7 +355,7 @@ FUNCTION ArmarDataCashFlowHistorico
 	WAIT WINDOW "Dibujando header financiero " + tcMoneda + "..." NOWAIT
 	lnFilaActual = DibujarCashflowHeader(loHoja, ;
 	                                     tnSemanaInicial, ;
-	                                     tnSemanaFinal, ;
+	                                     tnSemanasAdelante, ;
 	                                     tcMoneda)
 
     *========================================
@@ -362,7 +375,7 @@ FUNCTION ArmarDataCashFlowHistorico
     lnFilaInicioIngresos = lnFilaActual
 
     lcSQL = ;
-	    "EXEC dbo.CashflowDataIngresosPivot " + ;
+	    "EXEC dbo.CashflowPivot 'CashflowDataIngresos', " + ;
 	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
 	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
 	    ALLTRIM(tcMoneda) + "'"
@@ -371,14 +384,30 @@ FUNCTION ArmarDataCashFlowHistorico
 
     IF lnResult < 0
         AERROR(laError)
-        MESSAGEBOX("Error ejecutando CashflowDataIngresosPivot:" + ;
+        MESSAGEBOX("Error ejecutando CashflowPivot [Ingresos]:" + ;
                    CHR(13) + laError[2])
         RETURN .F.
     ENDIF
 
-    * 3) Dibujar ingresos
+    * 3) Dibujar ingresos (historico)
     WAIT WINDOW "Dibujando Ingresos en Excel " + tcMoneda + "..." NOWAIT
     lnFilaActual = DibujarCursor(loHoja, "csrIngresos", lnFilaActual)
+
+    * 3b) Proyeccion ingresos
+    IF tnSemanasAdelante > 0
+        WAIT WINDOW "Proyeccion Ingresos " + tcMoneda + "..." NOWAIT
+        lcSQL = ;
+            "EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, " + ;
+            ALLTRIM(STR(tnSemanasAdelante)) + ", '" + ;
+            ALLTRIM(tcMoneda) + "', 'INGRESOS'"
+        lnResult = SQLEXEC(ON, lcSQL, "csrIngresosProy")
+        IF lnResult < 0
+            AERROR(laError)
+            MESSAGEBOX("Error proyeccion Ingresos:" + CHR(13) + laError[2])
+            RETURN .F.
+        ENDIF
+        DibujarCursorProyeccion(loHoja, "csrIngresosProy", lnFilaInicioIngresos, lnColProy)
+    ENDIF
 
     lnFilaFinIngresos = lnFilaActual - 1
 
@@ -408,7 +437,7 @@ FUNCTION ArmarDataCashFlowHistorico
     lnFilaInicioEgresos = lnFilaActual
     
     lcSQL = ;
-	    "EXEC dbo.CashflowDataEgresosPivot " + ;
+	    "EXEC dbo.CashflowPivot 'CashflowDataEgresos', " + ;
 	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
 	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
 	    ALLTRIM(tcMoneda) + "'"
@@ -417,14 +446,30 @@ FUNCTION ArmarDataCashFlowHistorico
 
     IF lnResult < 0
         AERROR(laError)
-        MESSAGEBOX("Error ejecutando CashflowDataEgresosPivot:" + ;
+        MESSAGEBOX("Error ejecutando CashflowPivot [Egresos]:" + ;
                    CHR(13) + laError[2])
         RETURN .F.
     ENDIF
 
-    * 6) Dibujar egresos
+    * 6) Dibujar egresos (historico)
     WAIT WINDOW "Dibujando Egresos en Excel " + tcMoneda + "..." NOWAIT
     lnFilaActual = DibujarCursor(loHoja, "csrEgresos", lnFilaActual)
+
+    * 6b) Proyeccion egresos
+    IF tnSemanasAdelante > 0
+        WAIT WINDOW "Proyeccion Egresos " + tcMoneda + "..." NOWAIT
+        lcSQL = ;
+            "EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, " + ;
+            ALLTRIM(STR(tnSemanasAdelante)) + ", '" + ;
+            ALLTRIM(tcMoneda) + "', 'EGRESOS'"
+        lnResult = SQLEXEC(ON, lcSQL, "csrEgresosProy")
+        IF lnResult < 0
+            AERROR(laError)
+            MESSAGEBOX("Error proyeccion Egresos:" + CHR(13) + laError[2])
+            RETURN .F.
+        ENDIF
+        DibujarCursorProyeccion(loHoja, "csrEgresosProy", lnFilaInicioEgresos, lnColProy)
+    ENDIF
 
     lnFilaFinEgresos = lnFilaActual - 1
 
@@ -453,7 +498,7 @@ FUNCTION ArmarDataCashFlowHistorico
     lnFilaInicioFlujoEco = lnFilaActual
 
     lcSQL = ;
-        "EXEC dbo.CashflowDataFlujoEconomicoPivot " + ;
+        "EXEC dbo.CashflowPivot 'CashflowDataFlujoEconomico', " + ;
         ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
         ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
         ALLTRIM(tcMoneda) + "'"
@@ -462,14 +507,30 @@ FUNCTION ArmarDataCashFlowHistorico
 
     IF lnResult < 0
         AERROR(laError)
-        MESSAGEBOX("Error ejecutando CashflowDataFlujoEconomicoPivot:" + ;
+        MESSAGEBOX("Error ejecutando CashflowPivot [FlujoEconomico]:" + ;
                    CHR(13) + laError[2])
         RETURN .F.
     ENDIF
 
-    * 8) Dibujar flujo economico
+    * 8) Dibujar flujo economico (historico)
     WAIT WINDOW "Dibujando Flujo Economico en Excel " + tcMoneda + "..." NOWAIT
     lnFilaActual = DibujarCursor(loHoja, "csrFlujoEco", lnFilaActual)
+
+    * 8b) Proyeccion flujo economico
+    IF tnSemanasAdelante > 0
+        WAIT WINDOW "Proyeccion Flujo Economico " + tcMoneda + "..." NOWAIT
+        lcSQL = ;
+            "EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, " + ;
+            ALLTRIM(STR(tnSemanasAdelante)) + ", '" + ;
+            ALLTRIM(tcMoneda) + "', 'FINANCIAMIENTO'"
+        lnResult = SQLEXEC(ON, lcSQL, "csrFlujoEcoProy")
+        IF lnResult < 0
+            AERROR(laError)
+            MESSAGEBOX("Error proyeccion Flujo Economico:" + CHR(13) + laError[2])
+            RETURN .F.
+        ENDIF
+        DibujarCursorProyeccion(loHoja, "csrFlujoEcoProy", lnFilaInicioFlujoEco, lnColProy)
+    ENDIF
 
     lnFilaFinFlujoEco = lnFilaActual - 1
 
@@ -515,21 +576,7 @@ FUNCTION ArmarDataCashFlowHistorico
 ENDFUNC
 
 
-*-----------------------------------------------------------
-* ARMA DATA FUTURA (pendiente de implementar)
-* Dibujara proyecciones en las columnas futuras a partir
-* de tnSemanaInicial=1 hasta tnSemanaFinal=tnSemanasAdelante.
-* Por ahora NO se invoca desde GenerarCashFlowExcel.
-*-----------------------------------------------------------
-FUNCTION ArmarDataCashFlowFuturo
-    LPARAMETERS loHoja, ;
-                tnSemanaInicial, ;
-                tnSemanaFinal, ;
-                tcMoneda
 
-    * TODO: implementar consulta y dibujo de semanas futuras
-
-ENDFUNC
 
 
 *-----------------------------------------------------------
@@ -549,7 +596,7 @@ FUNCTION DibujarCashflowHeader
     WAIT WINDOW "Ejecutando consulta Header " + tcMoneda + "..." NOWAIT
 
     lcSQL = ;
-	    "EXEC dbo.CashflowDataHeaderPivot " + ;
+	    "EXEC dbo.CashflowPivot 'CashflowDataHeader', " + ;
 	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
 	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
 	    tcMoneda + "'"
@@ -558,7 +605,7 @@ FUNCTION DibujarCashflowHeader
 
     IF lnResult < 0
         AERROR(laError)
-        MESSAGEBOX("Error ejecutando CashflowDataHeaderPivot:" + CHR(13) + laError[2])
+        MESSAGEBOX("Error ejecutando CashflowPivot [Header]:" + CHR(13) + laError[2])
         RETURN lnFilaActual
     ENDIF
 
@@ -570,40 +617,55 @@ ENDFUNC
 
 *-----------------------------------------------------------
 * Dibuja cursor completo en Excel
+* Omite automaticamente la columna ItemOrder (usada solo
+* para ordenar en SQL, no debe aparecer en la hoja).
 *-----------------------------------------------------------
 FUNCTION DibujarCursor
     LPARAMETERS loHoja, tcCursor, lnFilaActual
 
-    LOCAL lnCol, lnTotalCols
+    LOCAL lnCol, lnTotalCols, lnExcelCol, lnLastExcelCol, lnSkip
 
     SELECT (tcCursor)
     GO TOP
 
     SCAN
         lnTotalCols = FCOUNT()
+
+        * Contar cuantas columnas se van a omitir (ItemOrder)
+        lnSkip = 0
+        FOR lnCol = 1 TO lnTotalCols
+            IF UPPER(ALLTRIM(FIELD(lnCol))) == "ITEMORDER"
+                lnSkip = lnSkip + 1
+            ENDIF
+        ENDFOR
+        lnLastExcelCol = 1 + lnTotalCols - lnSkip  && ultima col Excel que se escribe
+
         loHoja.Range( ;
             loHoja.Cells(lnFilaActual, 2), ;
-            loHoja.Cells(lnFilaActual, lnTotalCols + 1) ;
+            loHoja.Cells(lnFilaActual, lnLastExcelCol) ;
         ).Interior.Color = ColorFilaAlternar(lnFilaActual)
 
+        lnExcelCol = 2
         FOR lnCol = 1 TO lnTotalCols
-            loHoja.Cells(lnFilaActual, lnCol + 1).Value = ;
-                EVALUATE(FIELD(lnCol))
+            IF UPPER(ALLTRIM(FIELD(lnCol))) <> "ITEMORDER"
+                loHoja.Cells(lnFilaActual, lnExcelCol).Value = EVALUATE(FIELD(lnCol))
+                lnExcelCol = lnExcelCol + 1
+            ENDIF
         ENDFOR
 
-        * Formato numerico en columnas de datos (col 3 en adelante)
+        * Formato numerico en columnas de datos (col C en adelante)
         * 0 muestra guion (-) visualmente, valor real sigue siendo 0
-        IF lnTotalCols > 1
+        IF lnLastExcelCol > 2
             loHoja.Range( ;
                 loHoja.Cells(lnFilaActual, 3), ;
-                loHoja.Cells(lnFilaActual, lnTotalCols + 1) ;
+                loHoja.Cells(lnFilaActual, lnLastExcelCol) ;
             ).NumberFormat = "#,##0;-#,##0;" + CHR(34) + "-" + CHR(34)
         ENDIF
 
         * Borde fino en la fila de datos
         WITH loHoja.Range( ;
             loHoja.Cells(lnFilaActual, 2), ;
-            loHoja.Cells(lnFilaActual, lnTotalCols + 1) ;
+            loHoja.Cells(lnFilaActual, lnLastExcelCol) ;
         ).Borders
             .LineStyle = 1
             .Weight    = 2
@@ -613,6 +675,60 @@ FUNCTION DibujarCursor
     ENDSCAN
 
     RETURN lnFilaActual
+ENDFUNC
+
+
+*-----------------------------------------------------------
+* Dibuja cursor de proyeccion sobre filas existentes.
+* Escribe solo columnas de datos (omite Concepto e ItemOrder)
+* a partir de lnColInicio, sin crear filas nuevas.
+*-----------------------------------------------------------
+FUNCTION DibujarCursorProyeccion
+    LPARAMETERS loHoja, tcCursor, lnFilaInicio, lnColInicio
+
+    LOCAL lnCol, lnTotalCols, lnExcelCol, lnFila, lcFieldName
+
+    SELECT (tcCursor)
+    GO TOP
+
+    lnFila = lnFilaInicio
+
+    SCAN
+        lnTotalCols = FCOUNT()
+        lnExcelCol = lnColInicio
+
+        FOR lnCol = 1 TO lnTotalCols
+            lcFieldName = UPPER(ALLTRIM(FIELD(lnCol)))
+            IF lcFieldName <> "CONCEPTO" AND lcFieldName <> "ITEMORDER"
+                loHoja.Cells(lnFila, lnExcelCol).Value = EVALUATE(FIELD(lnCol))
+                lnExcelCol = lnExcelCol + 1
+            ENDIF
+        ENDFOR
+
+        * Formato y estilo en las celdas de proyeccion
+        IF lnExcelCol > lnColInicio
+            loHoja.Range( ;
+                loHoja.Cells(lnFila, lnColInicio), ;
+                loHoja.Cells(lnFila, lnExcelCol - 1) ;
+            ).NumberFormat = "#,##0;-#,##0;" + CHR(34) + "-" + CHR(34)
+
+            loHoja.Range( ;
+                loHoja.Cells(lnFila, lnColInicio), ;
+                loHoja.Cells(lnFila, lnExcelCol - 1) ;
+            ).Interior.Color = ColorFilaAlternar(lnFila)
+
+            WITH loHoja.Range( ;
+                loHoja.Cells(lnFila, lnColInicio), ;
+                loHoja.Cells(lnFila, lnExcelCol - 1) ;
+            ).Borders
+                .LineStyle = 1
+                .Weight    = 2
+            ENDWITH
+        ENDIF
+
+        lnFila = lnFila + 1
+    ENDSCAN
+
 ENDFUNC
 
 

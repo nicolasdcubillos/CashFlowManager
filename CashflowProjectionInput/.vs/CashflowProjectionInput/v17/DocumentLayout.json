@@ -7,16 +7,20 @@
       "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|d:\\nicolasd\\personal\\cc sistemas\\ofimatica\\intecplast\\cashflowmanager\\cashflowprojectioninput\\proveedorlookupform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\proveedorlookupform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:proveedorlookupform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|d:\\nicolasd\\personal\\cc sistemas\\ofimatica\\intecplast\\cashflowmanager\\cashflowprojectioninput\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|d:\\nicolasd\\personal\\cc sistemas\\ofimatica\\intecplast\\cashflowmanager\\cashflowprojectioninput\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{97A6FA2F-A72C-43EE-8776-767134DC7DE7}|CashflowProjectionInput.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,8 +30,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "Form1.Designer.cs",
+              "ToolTip": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.Designer.cs",
+              "RelativeToolTip": "Form1.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAABQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-26T00:37:37.043Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -36,7 +53,7 @@
               "RelativeDocumentMoniker": "Form1.cs",
               "ToolTip": "D:\\NICOLASD\\PERSONAL\\CC SISTEMAS\\OFIMATICA\\INTECPLAST\\CashFlowManager\\CashflowProjectionInput\\Form1.cs",
               "RelativeToolTip": "Form1.cs",
-              "ViewState": "AgIAAKwAAAAAAAAAAIAwwLEAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAABwAAAAAAAAAAAA4wN4AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-25T22:43:58.882Z",
               "EditorCaption": ""
@@ -51,8 +68,7 @@
               "RelativeToolTip": "ProveedorLookupForm.Designer.cs",
               "ViewState": "AgIAAD8AAAAAAAAAAIAwwFIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-25T22:15:44.303Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-25T22:15:44.303Z"
             },
             {
               "$type": "Document",
@@ -64,8 +80,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-25T22:06:54.382Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-25T22:06:54.382Z"
             },
             {
               "$type": "Document",

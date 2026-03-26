@@ -1,3 +1,6 @@
+USE INTECPL;
+GO
+
 /*
 ================================================================================
   Archivo      : CashflowDataIngresos.sql
@@ -22,18 +25,7 @@
                               exterior para obtener totales por categoria.
   Retorna nueve conceptos de ingreso mediante UNION ALL.
 
-  PROCEDIMIENTO  dbo.CashflowDataIngresosPivot (@SemanaInicial, @SemanaFinal, @Moneda)
-  -------------------------------------------------------------------------------------
-  Stored Procedure que transpone la salida de la funcion en una matriz
-  donde cada columna es un numero de semana. Construye dinamicamente la
-  lista de columnas con STRING_AGG/QUOTENAME y ejecuta un PIVOT con
-  SUM(Valor) FOR Semana mediante sp_executesql.
-
-  Ejemplo de uso:
-    EXEC dbo.CashflowDataIngresosPivot
-         @SemanaInicial = 1,
-         @SemanaFinal   = 6,
-         @Moneda        = 'COP';
+  PIVOT: usar dbo.CashflowPivot con @FunctionName = 'CashflowDataIngresos'.
 ================================================================================
 */
 
@@ -41,7 +33,8 @@ CREATE OR ALTER FUNCTION dbo.CashflowDataIngresos
 (
     @SemanaInicial INT,
     @SemanaFinal   INT,
-    @Moneda        VARCHAR(3)
+    @Moneda        VARCHAR(3),
+    @FechaBase     DATE = NULL   -- NULL usa GETDATE() (llamada directa / retrocompatible)
 )
 RETURNS TABLE
 AS
@@ -60,7 +53,7 @@ RETURN
     (
         SELECT 
             Semana,
-            DATEADD(WEEK, Semana, GETDATE()) AS FechaInicio
+            DATEADD(WEEK, Semana, ISNULL(@FechaBase, CAST(GETDATE() AS DATE))) AS FechaInicio
         FROM Numeros
     ),
 
@@ -82,8 +75,7 @@ RETURN
     (
         SELECT 
             t.Semana,
-            p.TIPOCLI,
-            p.EXTERIOR,
+            p.CashflowCategoryId,
             SUM(
                 CASE 
                     WHEN @Moneda = 'COP' THEN
@@ -106,92 +98,20 @@ RETURN
             ON tr.FECHA <= t.FechaInicio
         LEFT JOIN MTPROCLI p
             ON p.NIT = tr.NIT
+        WHERE p.CashflowCategoryId IS NOT NULL
         GROUP BY 
             t.Semana,
-            p.TIPOCLI,
-            p.EXTERIOR
-    ),
-
-    Agrupado AS
-    (
-        SELECT
-            Semana,
-
-            SUM(CASE WHEN TIPOCLI = '01' THEN Valor ELSE 0 END) AS ClientesNacionales,
-            SUM(CASE WHEN TIPOCLI = '02' THEN Valor ELSE 0 END) AS ClientesCarvajal,
-            SUM(CASE WHEN EXTERIOR = 1 THEN Valor ELSE 0 END) AS ClientesExterior,
-            SUM(CASE WHEN TIPOCLI = '03' THEN Valor ELSE 0 END) AS ReverseFactoring,
-            SUM(CASE WHEN TIPOCLI = '04' THEN Valor ELSE 0 END) AS PrestamoPieriplast,
-            SUM(CASE WHEN TIPOCLI = '05' THEN Valor ELSE 0 END) AS OtrosIngresos
-
-        FROM Datos
-        GROUP BY Semana
+            p.CashflowCategoryId
     )
 
-    SELECT 'Proyeccion Ventas Carvajal' AS Concepto, Semana, 0 AS Valor FROM Agrupado
-    UNION ALL
-    SELECT 'Clientes Nacionales', Semana, ClientesNacionales FROM Agrupado
-    UNION ALL
-    SELECT 'Clientes Nacionales Carvajal', Semana, ClientesCarvajal FROM Agrupado
-    UNION ALL
-    SELECT 'Clientes del Exterior', Semana, ClientesExterior FROM Agrupado
-    UNION ALL
-    SELECT 'Reverse Factoring', Semana, ReverseFactoring FROM Agrupado
-    UNION ALL
-    SELECT 'Prestamo Pieriplast', Semana, PrestamoPieriplast FROM Agrupado
-    UNION ALL
-    SELECT 'Otros Ingresos', Semana, OtrosIngresos FROM Agrupado
-    UNION ALL
-    SELECT 'Utilizacion Fiducia Impuesto al Plastico', Semana, 0 FROM Agrupado
-    UNION ALL
-    SELECT 'Monetizaciones - Usd a Cop', Semana, 0 FROM Agrupado
+    SELECT
+        cat.ParentName     AS Concepto,
+        cat.ItemOrder,
+        n.Semana,
+        ISNULL(d.Valor, 0) AS Valor
+    FROM dbo.CashflowCategory cat
+    CROSS JOIN Numeros n
+    LEFT JOIN Datos d ON d.CashflowCategoryId = cat.Id AND d.Semana = n.Semana
+    WHERE cat.Category = 'INGRESOS'
 )
-GO
-
-CREATE OR ALTER PROCEDURE dbo.CashflowDataIngresosPivot
-(
-    @SemanaInicial INT,
-    @SemanaFinal   INT,
-    @Moneda        VARCHAR(3)
-)
-AS
-BEGIN
-
-    SET NOCOUNT ON;
-
-    DECLARE @Columnas NVARCHAR(MAX)
-    DECLARE @SQL NVARCHAR(MAX)
-
-    ;WITH Numeros AS
-    (
-        SELECT @SemanaInicial AS Semana
-        UNION ALL
-        SELECT Semana + 1
-        FROM Numeros
-        WHERE Semana + 1 <= @SemanaFinal
-    )
-    SELECT @Columnas = STRING_AGG(QUOTENAME(Semana), ',')
-    FROM Numeros
-    OPTION (MAXRECURSION 1000)
-
-    SET @SQL = '
-        SELECT *
-        FROM
-        (
-            SELECT Concepto, Semana, Valor
-            FROM dbo.CashflowDataIngresos('
-            + CAST(@SemanaInicial AS VARCHAR) + ','
-            + CAST(@SemanaFinal AS VARCHAR) + ','''
-            + @Moneda + ''')
-        ) src
-        PIVOT
-        (
-            SUM(Valor)
-            FOR Semana IN (' + @Columnas + ')
-        ) p
-    '
-
-    EXEC sp_executesql @SQL
-
-END
 GO
