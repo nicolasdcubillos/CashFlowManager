@@ -1,0 +1,9 @@
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\bin\Debug\CashflowManagerUI.exe.config
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\bin\Debug\CashflowManagerUI.exe
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\bin\Debug\CashflowManagerUI.pdb
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.csproj.AssemblyReference.cache
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashFlowManager.UI.Properties.Resources.resources
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.csproj.GenerateResource.cache
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.csproj.CoreCompileInputs.cache
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.exe
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.pdb
