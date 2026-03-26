@@ -31,18 +31,52 @@ namespace CashflowProjectionInput
             InitializeComponent();
             _dt = ConstruirTablaVacia();
             dgvProjection.DataSource = _dt;
+
+            // Inicializar filtro al año e ISO semana actuales sin disparar recargas dobles
+            nudAno.ValueChanged    -= nudAno_ValueChanged;
+            nudSemana.ValueChanged -= nudSemana_ValueChanged;
+            nudAno.Value    = DateTime.Today.Year;
+            nudSemana.Value = GetIsoWeek(DateTime.Today);
+            nudAno.ValueChanged    += nudAno_ValueChanged;
+            nudSemana.ValueChanged += nudSemana_ValueChanged;
+
             CargarDatos();
         }
 
         // ── Carga de datos ─────────────────────────────────────────────
         private void CargarDatos()
         {
+            bool anoBlanco    = string.IsNullOrWhiteSpace(nudAno.Text);
+            bool semanaBlanca = string.IsNullOrWhiteSpace(nudSemana.Text);
+            int  year         = anoBlanco    ? 0 : (int)nudAno.Value;
+            int  week         = semanaBlanca ? 0 : (int)nudSemana.Value;
+            bool filter       = year > 0 && week > 0;
+
             try
             {
                 using (var conn = new OdbcConnection(ConnStr))
                 {
                     conn.Open();
-                    _adapter = new OdbcDataAdapter(SelectSql, conn);
+
+                    if (filter)
+                    {
+                        string sql =
+                            "SELECT NIT, [Year], [Week], TotalProjected " +
+                            "FROM dbo.CashflowProjection " +
+                            "WHERE [Year] = ? AND [Week] = ? " +
+                            "ORDER BY NIT";
+                        var cmd = new OdbcCommand(sql, conn);
+                        var pYear = new OdbcParameter("Year", OdbcType.SmallInt) { Value = (short)year };
+                        var pWeek = new OdbcParameter("Week", OdbcType.TinyInt)  { Value = (byte)week  };
+                        cmd.Parameters.Add(pYear);
+                        cmd.Parameters.Add(pWeek);
+                        _adapter = new OdbcDataAdapter(cmd);
+                    }
+                    else
+                    {
+                        _adapter = new OdbcDataAdapter(SelectSql, conn);
+                    }
+
                     _dt = ConstruirTablaVacia();
                     _adapter.Fill(_dt);
                     dgvProjection.DataSource = _dt;
@@ -56,6 +90,12 @@ namespace CashflowProjectionInput
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void nudAno_ValueChanged(object sender, EventArgs e)    => CargarDatos();
+        private void nudSemana_ValueChanged(object sender, EventArgs e) => CargarDatos();
+
+        private void nudAno_TextChanged(object sender, EventArgs e)    { if (string.IsNullOrWhiteSpace(nudAno.Text))    CargarDatos(); }
+        private void nudSemana_TextChanged(object sender, EventArgs e) { if (string.IsNullOrWhiteSpace(nudSemana.Text)) CargarDatos(); }
 
         // ── Guardar ────────────────────────────────────────────────────
         private void GuardarDatos()
@@ -229,5 +269,11 @@ namespace CashflowProjectionInput
             return (jan1.DayOfWeek == DayOfWeek.Thursday || dec31.DayOfWeek == DayOfWeek.Thursday)
                 ? 53 : 52;
         }
+
+        private static int GetIsoWeek(DateTime date) =>
+            System.Globalization.CultureInfo.InvariantCulture.Calendar
+                .GetWeekOfYear(date,
+                    System.Globalization.CalendarWeekRule.FirstFourDayWeek,
+                    DayOfWeek.Monday);
     }
 }

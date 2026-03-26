@@ -22,11 +22,20 @@ FUNCTION generarCashFlowExcelFecha
     LPARAMETERS tdFechaFinal
 
     LOCAL tnSemanasAtras, tnSemanasAdelante
+    LOCAL ldFechaBase, ldFechaInicial, ldFechaFinalRango
 
     tnSemanasAtras    = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAtras",    6)))
     tnSemanasAdelante = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAdelante", 6)))
 
-    RETURN GenerarCashFlowExcel(tdFechaFinal, tnSemanasAtras, tnSemanasAdelante)
+    * Calcular lunes de la semana de tdFechaFinal
+    ldFechaBase = tdFechaFinal - (DOW(tdFechaFinal,2) - 1)
+
+    * Rango absoluto de fechas
+    ldFechaInicial    = ldFechaBase - (tnSemanasAtras * 7)
+    ldFechaFinalRango = ldFechaBase + (tnSemanasAdelante * 7) + 6
+
+    RETURN GenerarCashFlowExcel(tdFechaFinal, tnSemanasAtras, tnSemanasAdelante, ;>
+                                ldFechaInicial, ldFechaFinalRango)
 ENDFUNC
 
 *-----------------------------------------------------------
@@ -39,6 +48,7 @@ FUNCTION generarCashFlowExcelSemana
 
     LOCAL ldJan4, lnDOW, ldLunesS1, ldFechaFinal
     LOCAL tnSemanasAtras, tnSemanasAdelante
+    LOCAL ldFechaBase, ldFechaInicial, ldFechaFinalRango
 
     * ISO 8601: la semana 1 siempre contiene el 4 de enero.
     * Encontramos el lunes de esa semana y sumamos (tnSemana-1)*7 dias.
@@ -50,7 +60,15 @@ FUNCTION generarCashFlowExcelSemana
     tnSemanasAtras    = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAtras",    6)))
     tnSemanasAdelante = VAL(TRANSFORM(LeerConfigCashFlow("SemanasAdelante", 6)))
 
-    RETURN GenerarCashFlowExcel(ldFechaFinal, tnSemanasAtras, tnSemanasAdelante)
+    * ldFechaFinal ya es el lunes de la semana pedida = ldFechaBase
+    ldFechaBase = ldFechaFinal
+
+    * Rango absoluto de fechas
+    ldFechaInicial    = ldFechaBase - (tnSemanasAtras * 7)
+    ldFechaFinalRango = ldFechaBase + (tnSemanasAdelante * 7) + 6
+
+    RETURN GenerarCashFlowExcel(ldFechaFinal, tnSemanasAtras, tnSemanasAdelante, ;
+                                ldFechaInicial, ldFechaFinalRango)
 ENDFUNC
 
 *-----------------------------------------------------------* FUNCION PRINCIPAL
@@ -59,7 +77,9 @@ ENDFUNC
 FUNCTION GenerarCashFlowExcel
     LPARAMETERS tdFechaFinal, ;
                 tnSemanasAtras, ;
-                tnSemanasAdelante
+                tnSemanasAdelante, ;
+                tdFechaInicial, ;
+                tdFechaFinalRango
 
     LOCAL loExcel, loLibro, loHojaUSD
     LOCAL ldFechaBase
@@ -78,8 +98,8 @@ FUNCTION GenerarCashFlowExcel
     laNomMeses[11] = "Noviembre"
     laNomMeses[12] = "Diciembre"
 
-    IF PCOUNT() < 3
-        MESSAGEBOX("Debe enviar FechaFinal, SemanasAtras, SemanasAdelante",16,"Error")
+    IF PCOUNT() < 5
+        MESSAGEBOX("Debe enviar FechaFinal, SemanasAtras, SemanasAdelante, FechaInicial, FechaFinalRango",16,"Error")
         RETURN .F.
     ENDIF
 
@@ -121,9 +141,10 @@ FUNCTION GenerarCashFlowExcel
 
         * SQL historico + proyectado
         IF NOT ArmarDataCashFlowHistorico(loHojaUSD, ;
-                                          -tnSemanasAtras, ;
-                                          0, ;
+                                          tdFechaInicial, ;
+                                          tdFechaFinalRango, ;
                                           "USD", ;
+                                          tnSemanasAtras, ;
                                           tnSemanasAdelante)
             RETURN .F.
         ENDIF
@@ -138,7 +159,9 @@ FUNCTION GenerarCashFlowExcel
                                   tdFechaFinal, ;
                                   ldFechaBase, ;
                                   tnSemanasAtras, ;
-                                  tnSemanasAdelante)
+                                  tnSemanasAdelante, ;
+                                  tdFechaInicial, ;
+                                  tdFechaFinalRango)
             RETURN .F.
         ENDIF
 
@@ -179,7 +202,8 @@ ENDFUNC
 FUNCTION CrearHojaCashFlow
     LPARAMETERS loLibro, tcMoneda, ;
                 tdFechaFinal, ldFechaBase, ;
-                tnSemanasAtras, tnSemanasAdelante
+                tnSemanasAtras, tnSemanasAdelante, ;
+                tdFechaInicial, tdFechaFinalRango
 
     LOCAL loHoja
 
@@ -202,9 +226,10 @@ FUNCTION CrearHojaCashFlow
     WAIT WINDOW "Consultando y dibujando datos " + tcMoneda + "..." NOWAIT
     * SQL historico + proyectado
     IF NOT ArmarDataCashFlowHistorico(loHoja, ;
-                                      -tnSemanasAtras, ;
-                                      0, ;
+                                      tdFechaInicial, ;
+                                      tdFechaFinalRango, ;
                                       tcMoneda, ;
+                                      tnSemanasAtras, ;
                                       tnSemanasAdelante)
         RETURN .F.
     ENDIF
@@ -320,15 +345,17 @@ ENDFUNC
 * 2-8) ARMA DATA: HISTORICA + PROYECTADA
 * Ejecuta vistas SQL y dibuja Header, Ingresos, Egresos,
 * Flujo Economico, Subtotales y Flujo Neto.
-* tnSemanaInicial   : numero negativo (ej. -5 = 5 semanas atras)
-* tnSemanaFinal     : 0 = semana actual
+* tdFechaInicial    : fecha inicio rango completo (lunes primera semana)
+* tdFechaFinalRango : fecha fin rango completo (domingo ultima semana)
+* tnSemanasAtras    : cantidad de semanas historicas
 * tnSemanasAdelante : semanas futuras a proyectar (0 = sin proyeccion)
 *-----------------------------------------------------------
 FUNCTION ArmarDataCashFlowHistorico
     LPARAMETERS loHoja, ;
-                tnSemanaInicial, ;
-                tnSemanaFinal, ;
+                tdFechaInicial, ;
+                tdFechaFinalRango, ;
                 tcMoneda, ;
+                tnSemanasAtras, ;
                 tnSemanasAdelante
 
     LOCAL lnFilaActual
@@ -338,14 +365,32 @@ FUNCTION ArmarDataCashFlowHistorico
     LOCAL lnTmpCol, lnUltimaColData
     LOCAL lcSQL, lnResult, laError[1]
     LOCAL lnColProy
+    LOCAL lcFechaIni, lcFechaFin
+    LOCAL lcFechaIniHist, lcFechaFinHist
+    LOCAL lcFechaIniProy, lcFechaFinProy
+    LOCAL ldFechaFinHist, ldFechaIniProy
 
-    IF PCOUNT() < 5
+    IF PCOUNT() < 6
         tnSemanasAdelante = 0
     ENDIF
 
+    * Strings ISO para las fechas del rango completo
+    lcFechaIni = FechaSQL(tdFechaInicial)
+    lcFechaFin = FechaSQL(tdFechaFinalRango)
+
+    * Fecha corte historico: domingo de la semana actual (SemanasAtras semanas despues del inicio)
+    ldFechaFinHist = tdFechaInicial + (tnSemanasAtras * 7) + 6
+    lcFechaIniHist = lcFechaIni
+    lcFechaFinHist = FechaSQL(ldFechaFinHist)
+
+    * Fecha inicio proyeccion: lunes siguiente a la semana actual
+    ldFechaIniProy = tdFechaInicial + ((tnSemanasAtras + 1) * 7)
+    lcFechaIniProy = FechaSQL(ldFechaIniProy)
+    lcFechaFinProy = lcFechaFin
+
     * Columna Excel donde comienza la proyeccion
-    * Columnas historicas: 3 hasta 3 + ABS(tnSemanaInicial)
-    lnColProy = 3 + ABS(tnSemanaInicial) + 1
+    * Columnas historicas: 3 hasta 3 + SemanasAtras (incluye semana actual)
+    lnColProy = 3 + tnSemanasAtras + 1
 
     lnFilaActual = 8
     
@@ -354,8 +399,8 @@ FUNCTION ArmarDataCashFlowHistorico
 	*========================================
 	WAIT WINDOW "Dibujando header financiero " + tcMoneda + "..." NOWAIT
 	lnFilaActual = DibujarCashflowHeader(loHoja, ;
-	                                     tnSemanaInicial, ;
-	                                     tnSemanasAdelante, ;
+	                                     lcFechaIniHist, ;
+	                                     lcFechaFinHist, ;
 	                                     tcMoneda)
 
     *========================================
@@ -375,9 +420,9 @@ FUNCTION ArmarDataCashFlowHistorico
     lnFilaInicioIngresos = lnFilaActual
 
     lcSQL = ;
-	    "EXEC dbo.CashflowPivot 'CashflowDataIngresos', " + ;
-	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
-	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+	    "EXEC dbo.CashflowPivot 'CashflowDataIngresos', '" + ;
+	    lcFechaIniHist + "', '" + ;
+	    lcFechaFinHist + "', '" + ;
 	    ALLTRIM(tcMoneda) + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrIngresos")
@@ -397,8 +442,9 @@ FUNCTION ArmarDataCashFlowHistorico
     IF tnSemanasAdelante > 0
         WAIT WINDOW "Proyeccion Ingresos " + tcMoneda + "..." NOWAIT
         lcSQL = ;
-            "EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, " + ;
-            ALLTRIM(STR(tnSemanasAdelante)) + ", '" + ;
+            "EXEC dbo.CashflowPivot 'CashflowDataProjection', '" + ;
+            lcFechaIniProy + "', '" + ;
+            lcFechaFinProy + "', '" + ;
             ALLTRIM(tcMoneda) + "', 'INGRESOS'"
         lnResult = SQLEXEC(ON, lcSQL, "csrIngresosProy")
         IF lnResult < 0
@@ -437,9 +483,9 @@ FUNCTION ArmarDataCashFlowHistorico
     lnFilaInicioEgresos = lnFilaActual
     
     lcSQL = ;
-	    "EXEC dbo.CashflowPivot 'CashflowDataEgresos', " + ;
-	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
-	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+	    "EXEC dbo.CashflowPivot 'CashflowDataEgresos', '" + ;
+	    lcFechaIniHist + "', '" + ;
+	    lcFechaFinHist + "', '" + ;
 	    ALLTRIM(tcMoneda) + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrEgresos")
@@ -459,8 +505,9 @@ FUNCTION ArmarDataCashFlowHistorico
     IF tnSemanasAdelante > 0
         WAIT WINDOW "Proyeccion Egresos " + tcMoneda + "..." NOWAIT
         lcSQL = ;
-            "EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, " + ;
-            ALLTRIM(STR(tnSemanasAdelante)) + ", '" + ;
+            "EXEC dbo.CashflowPivot 'CashflowDataProjection', '" + ;
+            lcFechaIniProy + "', '" + ;
+            lcFechaFinProy + "', '" + ;
             ALLTRIM(tcMoneda) + "', 'EGRESOS'"
         lnResult = SQLEXEC(ON, lcSQL, "csrEgresosProy")
         IF lnResult < 0
@@ -498,9 +545,9 @@ FUNCTION ArmarDataCashFlowHistorico
     lnFilaInicioFlujoEco = lnFilaActual
 
     lcSQL = ;
-        "EXEC dbo.CashflowPivot 'CashflowDataFlujoEconomico', " + ;
-        ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
-        ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+        "EXEC dbo.CashflowPivot 'CashflowDataFlujoEconomico', '" + ;
+        lcFechaIniHist + "', '" + ;
+        lcFechaFinHist + "', '" + ;
         ALLTRIM(tcMoneda) + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrFlujoEco")
@@ -520,8 +567,9 @@ FUNCTION ArmarDataCashFlowHistorico
     IF tnSemanasAdelante > 0
         WAIT WINDOW "Proyeccion Flujo Economico " + tcMoneda + "..." NOWAIT
         lcSQL = ;
-            "EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, " + ;
-            ALLTRIM(STR(tnSemanasAdelante)) + ", '" + ;
+            "EXEC dbo.CashflowPivot 'CashflowDataProjection', '" + ;
+            lcFechaIniProy + "', '" + ;
+            lcFechaFinProy + "', '" + ;
             ALLTRIM(tcMoneda) + "', 'FINANCIAMIENTO'"
         lnResult = SQLEXEC(ON, lcSQL, "csrFlujoEcoProy")
         IF lnResult < 0
@@ -944,4 +992,15 @@ FUNCTION ObtenerTRM
     ENDIF
 
     RETURN lnValor
+ENDFUNC
+
+*-----------------------------------------------------------
+* Convierte fecha VFP a string ISO 'YYYY-MM-DD' para SQL
+*-----------------------------------------------------------
+FUNCTION FechaSQL
+    LPARAMETERS tdFecha
+
+    RETURN TRANSFORM(YEAR(tdFecha))  + "-" + ;
+           PADL(MONTH(tdFecha),2,"0") + "-" + ;
+           PADL(DAY(tdFecha),2,"0")
 ENDFUNC

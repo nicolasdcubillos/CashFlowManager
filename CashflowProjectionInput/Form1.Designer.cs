@@ -25,6 +25,11 @@
             this.btnGuardar    = new System.Windows.Forms.Button();
             this.btnEliminar   = new System.Windows.Forms.Button();
             this.lblStatus     = new System.Windows.Forms.Label();
+            this.pnlFilter     = new System.Windows.Forms.Panel();
+            this.lblAno        = new System.Windows.Forms.Label();
+            this.nudAno        = new System.Windows.Forms.NumericUpDown();
+            this.lblSemana     = new System.Windows.Forms.Label();
+            this.nudSemana     = new System.Windows.Forms.NumericUpDown();
             this.pnlGrid       = new System.Windows.Forms.Panel();
             this.dgvProjection = new System.Windows.Forms.DataGridView();
             this.pnlFooter     = new System.Windows.Forms.Panel();
@@ -36,9 +41,12 @@
 
             this.pnlHeader.SuspendLayout();
             this.pnlToolbar.SuspendLayout();
+            this.pnlFilter.SuspendLayout();
             this.pnlGrid.SuspendLayout();
             this.pnlFooter.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvProjection)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudAno)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudSemana)).BeginInit();
             this.SuspendLayout();
 
             // ── pnlAccent (franja izquierda de color) ────────────────────
@@ -159,7 +167,66 @@
             this.pnlToolbar.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlToolbar.Size      = new System.Drawing.Size(780, 50);
             this.pnlToolbar.TabIndex  = 1;
+            // ── lblAno ──────────────────────────────────────────────────
+            this.lblAno.AutoSize  = true;
+            this.lblAno.Font      = new System.Drawing.Font("Segoe UI", 8.75F);
+            this.lblAno.ForeColor = System.Drawing.Color.FromArgb(107, 114, 128);
+            this.lblAno.Location  = new System.Drawing.Point(16, 12);
+            this.lblAno.TabIndex  = 0;
+            this.lblAno.Text      = "A\u00f1o:";
 
+            // ── nudAno ──────────────────────────────────────────────────
+            this.nudAno.BorderStyle  = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.nudAno.Font         = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.nudAno.Location     = new System.Drawing.Point(58, 8);
+            this.nudAno.Maximum      = 2099M;
+            this.nudAno.Minimum      = 0M;
+            this.nudAno.Name         = "nudAno";
+            this.nudAno.Size         = new System.Drawing.Size(76, 24);
+            this.nudAno.TabIndex     = 1;
+            this.nudAno.Value        = 0M;
+            this.nudAno.ValueChanged += new System.EventHandler(this.nudAno_ValueChanged);
+            this.nudAno.TextChanged  += new System.EventHandler(this.nudAno_TextChanged);
+
+            // ── lblSemana ────────────────────────────────────────────────
+            this.lblSemana.AutoSize  = true;
+            this.lblSemana.Font      = new System.Drawing.Font("Segoe UI", 8.75F);
+            this.lblSemana.ForeColor = System.Drawing.Color.FromArgb(107, 114, 128);
+            this.lblSemana.Location  = new System.Drawing.Point(148, 12);
+            this.lblSemana.TabIndex  = 2;
+            this.lblSemana.Text      = "Semana:";
+
+            // ── nudSemana ────────────────────────────────────────────────
+            this.nudSemana.BorderStyle  = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.nudSemana.Font         = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.nudSemana.Location     = new System.Drawing.Point(214, 8);
+            this.nudSemana.Maximum      = 53M;
+            this.nudSemana.Minimum      = 0M;
+            this.nudSemana.Name         = "nudSemana";
+            this.nudSemana.Size         = new System.Drawing.Size(56, 24);
+            this.nudSemana.TabIndex     = 3;
+            this.nudSemana.Value        = 0M;
+            this.nudSemana.ValueChanged += new System.EventHandler(this.nudSemana_ValueChanged);
+            this.nudSemana.TextChanged  += new System.EventHandler(this.nudSemana_TextChanged);
+
+            // ── lblFiltroHint ─────────────────────────────────────────────
+            this.lblFiltroHint.AutoSize  = true;
+            this.lblFiltroHint.Font      = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Italic);
+            this.lblFiltroHint.ForeColor = System.Drawing.Color.FromArgb(180, 183, 189);
+            this.lblFiltroHint.Location  = new System.Drawing.Point(280, 12);
+            this.lblFiltroHint.TabIndex  = 4;
+            this.lblFiltroHint.Text      = "(0 = todos los per\u00edodos)";
+
+            // ── pnlFilter ───────────────────────────────────────────────
+            this.pnlFilter.BackColor = System.Drawing.Color.FromArgb(240, 244, 248);
+            this.pnlFilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.pnlFilter.Controls.Add(this.nudSemana);
+            this.pnlFilter.Controls.Add(this.lblSemana);
+            this.pnlFilter.Controls.Add(this.nudAno);
+            this.pnlFilter.Controls.Add(this.lblAno);
+            this.pnlFilter.Dock      = System.Windows.Forms.DockStyle.Top;
+            this.pnlFilter.Size      = new System.Drawing.Size(780, 40);
+            this.pnlFilter.TabIndex  = 5;
             // ── Estilos del DataGridView ──────────────────────────────────
             var headerStyle = new System.Windows.Forms.DataGridViewCellStyle();
             headerStyle.Alignment  = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
@@ -287,6 +354,7 @@
             this.Controls.Add(this.pnlGrid);
             this.Controls.Add(this.pnlFooter);
             this.Controls.Add(this.pnlToolbar);
+            this.Controls.Add(this.pnlFilter);
             this.Controls.Add(this.pnlHeader);
             this.Font            = new System.Drawing.Font("Segoe UI", 9F);
             this.MinimumSize     = new System.Drawing.Size(600, 400);
@@ -296,8 +364,12 @@
 
             this.pnlHeader.ResumeLayout(false);
             this.pnlToolbar.ResumeLayout(false);
+            this.pnlFilter.ResumeLayout(false);
+            this.pnlFilter.PerformLayout();
             this.pnlGrid.ResumeLayout(false);
             this.pnlFooter.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.nudAno)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudSemana)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvProjection)).EndInit();
             this.ResumeLayout(false);
         }
@@ -314,6 +386,11 @@
         private System.Windows.Forms.Button                      btnGuardar;
         private System.Windows.Forms.Button                      btnEliminar;
         private System.Windows.Forms.Label                       lblStatus;
+        private System.Windows.Forms.Panel                       pnlFilter;
+        private System.Windows.Forms.Label                       lblAno;
+        private System.Windows.Forms.NumericUpDown               nudAno;
+        private System.Windows.Forms.Label                       lblSemana;
+        private System.Windows.Forms.NumericUpDown               nudSemana;
         private System.Windows.Forms.Panel                       pnlGrid;
         private System.Windows.Forms.DataGridView                dgvProjection;
         private System.Windows.Forms.Panel                       pnlFooter;
