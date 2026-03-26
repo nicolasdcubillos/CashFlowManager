@@ -20,11 +20,10 @@ GO
                               @FechaInicial hasta @FechaFinal.
     - TRM                   : consulta la tasa de cambio vigente en MTCAMBIO
                               para la fecha de inicio de cada semana.
-    - Saldos                : acumula movimientos bancarios (MVBANCOS) hasta
-                              la fecha de cada semana, separando COP y USD
-                              por OTRAMON, y Prestamos COP/USD por cuenta.
-                              Todos los conceptos se convierten limpiamente
-                              segun @Moneda usando la TRM de cada semana.
+    - Saldos                : invoca fnvOF_ReporteMVBancos_Saldos por semana
+                              (lunes a domingo) y agrupa Saldo_Final separando
+                              COP y USD segun Otra_Moneda. Convierte segun
+                              @Moneda usando la TRM de cada semana.
   Retorna cuatro conceptos: Saldo inicial COP, Saldo inicial USD,
   PA Credicorp - Excedentes y Disponible Bancos.
 
@@ -75,26 +74,26 @@ RETURN
             s.Semana,
             t.TRM,
 
-            SUM(CASE WHEN MB.OTRAMON = 'N' THEN MV.VALOR ELSE 0 END) AS SaldoCOP,
-            SUM(CASE WHEN MB.OTRAMON = 'S' THEN MV.VALOR ELSE 0 END) AS SaldoUSD,
+            -- Pesos y MultiMoneda tienen otramon='N' => COP; OtraMoneda tiene otramon='S' => USD
+            SUM(CASE WHEN fn.Tipo_Moneda IN ('Pesos', 'MultiMoneda') THEN fn.Saldo_Final ELSE 0 END) AS SaldoCOP,
+            SUM(CASE WHEN fn.Tipo_Moneda = 'OtraMoneda'              THEN fn.Saldo_Final ELSE 0 END) AS SaldoUSD,
 
             -- Prestamos separados por moneda para conversion limpia
-            SUM(CASE WHEN MV.CODIGOCTA IN ('CTA_PRESTAMO_1','CTA_PRESTAMO_2')
-                          AND MB.OTRAMON = 'N'
-                     THEN MV.VALOR ELSE 0 END) AS PrestamosCOP,
-            SUM(CASE WHEN MV.CODIGOCTA IN ('CTA_PRESTAMO_1','CTA_PRESTAMO_2')
-                          AND MB.OTRAMON = 'S'
-                     THEN MV.VALOR ELSE 0 END) AS PrestamosUSD
+            SUM(CASE WHEN fn.Banco IN ('CTA_PRESTAMO_1','CTA_PRESTAMO_2')
+                          AND fn.Tipo_Moneda IN ('Pesos', 'MultiMoneda')
+                     THEN fn.Saldo_Final ELSE 0 END) AS PrestamosCOP,
+            SUM(CASE WHEN fn.Banco IN ('CTA_PRESTAMO_1','CTA_PRESTAMO_2')
+                          AND fn.Tipo_Moneda = 'OtraMoneda'
+                     THEN fn.Saldo_Final ELSE 0 END) AS PrestamosUSD
 
         FROM Semanas s
 
         LEFT JOIN TRM t ON t.Semana = s.Semana
 
-        LEFT JOIN MVBANCOS MV 
-               ON MV.FECHA <= s.LunesSemana
-
-        LEFT JOIN MTBANCOS MB 
-               ON MB.CODIGOCTA = MV.CODIGOCTA
+        CROSS APPLY dbo.fnvOF_ReporteMVBancos_Saldos(
+            s.LunesSemana,
+            DATEADD(DAY, 6, s.LunesSemana)
+        ) fn
 
         GROUP BY s.Semana, t.TRM
     )

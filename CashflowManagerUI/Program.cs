@@ -24,8 +24,9 @@ namespace CashFlowManager.UI
             Form form;
             switch (screen)
             {
-                case "documento":  form = new DocumentQueryForm();     break;
-                case "proveedores": form = new ProveedorCategoryForm(); break;
+                case "documento":      form = new DocumentQueryForm();     break;
+                case "proveedores":    form = new ProveedorCategoryForm(); break;
+                case "configuracion":  form = new CashflowConfigForm();    break;
                 // Nuevas pantallas se registran aquí:
                 // case "egresos":  form = new EgresosForm();  break;
                 // case "ingresos": form = new IngresosForm(); break;

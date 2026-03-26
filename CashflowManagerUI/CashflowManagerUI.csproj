@@ -47,25 +47,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\BaseProjectionForm.cs">
+    <Compile Include="Forms\Common\BaseProjectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Projection\ProjectionForm.cs">
+    <Compile Include="Forms\Projection\ProjectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Projection\ProjectionForm.Designer.cs">
+    <Compile Include="Forms\Projection\ProjectionForm.Designer.cs">
       <DependentUpon>ProjectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Projection\ProveedorLookupForm.cs">
+    <Compile Include="Forms\Projection\ProveedorLookupForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Projection\ProveedorLookupForm.Designer.cs">
+    <Compile Include="Forms\Projection\ProveedorLookupForm.Designer.cs">
       <DependentUpon>ProveedorLookupForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DocumentQuery\DocumentQueryForm.cs">
+    <Compile Include="Forms\DocumentQuery\DocumentQueryForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ProveedorCategory\ProveedorCategoryForm.cs">
+    <Compile Include="Forms\ProveedorCategory\ProveedorCategoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Configuration\CashflowConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Program.cs" />

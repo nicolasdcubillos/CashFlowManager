@@ -18,11 +18,12 @@ GO
     - Semanas               : genera semanas (lunes a domingo) desde
                               @FechaInicial hasta @FechaFinal.
     - TRMSemana             : TRM vigente por semana consultada en MTCAMBIO.
-    - Datos                 : cruza operaciones comerciales (TRADE) con el
-                              maestro de clientes/proveedores (MTPROCLI),
-                              filtrando por FECING dentro del rango de cada
-                              semana, convirtiendo los valores a COP o USD
-                              segun @Moneda y la TRM de cada semana.
+    - Datos                 : cruza facturas de venta (TRADE, ORIGEN='FAC')
+                              con el maestro de clientes/proveedores (MTPROCLI),
+                              filtrando por FechaCobro (o FECING si no tiene)
+                              dentro del rango de cada semana, convirtiendo
+                              los valores a COP o USD segun @Moneda y la TRM
+                              de cada semana.
     - Agrupado              : agrupa por CashflowCategoryId y semana.
   Retorna nueve conceptos de ingreso mediante CROSS JOIN con CashflowCategory.
 
@@ -58,12 +59,12 @@ RETURN
         SELECT 
             s.Semana,
             s.LunesSemana,
-            (
+            ISNULL((
                 SELECT TOP 1 VALOR
                 FROM MTCAMBIO c
                 WHERE c.FECHA <= s.LunesSemana
                 ORDER BY c.FECHA DESC
-            ) AS TRM
+            ), 1) AS TRM
         FROM Semanas s
     ),
 
@@ -82,8 +83,9 @@ RETURN
             ) AS Valor
         FROM TRMSemana t
         INNER JOIN TRADE tr
-            ON tr.FECING >= t.LunesSemana
-           AND tr.FECING <  DATEADD(DAY, 7, t.LunesSemana)
+            ON COALESCE(tr.FechaCobro, tr.FECING) >= t.LunesSemana
+           AND COALESCE(tr.FechaCobro, tr.FECING) <  DATEADD(DAY, 7, t.LunesSemana)
+           AND tr.ORIGEN = 'FAC'
         INNER JOIN MTPROCLI p
             ON p.NIT = tr.NIT
         WHERE p.CashflowCategoryId IS NOT NULL
