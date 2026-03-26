@@ -11,14 +11,15 @@ GO
                  FINANCIAMIENTO) en una sola consulta; filtrar con @Category
                  en CashflowPivot al invocar.
   Autor        : CC Sistemas
-  Fecha        : 2026-03-25
+  Fecha        : 2026-03-26
 ================================================================================
 
-  FUNCION  dbo.CashflowDataProjection (@SemanaInicial, @SemanaFinal, @Moneda)
+  FUNCION  dbo.CashflowDataProjection (@FechaInicial, @FechaFinal, @Moneda)
   ---------------------------------------------------------------------------
   Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto x
   semana del rango indicado. Internamente construye:
-    - Numeros / FechaSemana : rango de semanas relativas con fecha de inicio.
+    - Semanas               : genera semanas (lunes a domingo) desde
+                              @FechaInicial hasta @FechaFinal.
     - SemanaISO             : convierte cada fecha a (ISOYear, ISOWeek) para
                               cruzar contra CashflowProjection.
     - TRMSemana             : TRM vigente para conversion a USD.
@@ -28,7 +29,7 @@ GO
     Category   VARCHAR(20)    - INGRESOS / EGRESOS / FINANCIAMIENTO
     Concepto   VARCHAR(150)   - ParentName de CashflowCategory
     ItemOrder  INT            - para ordenar filas dentro de la seccion
-    Semana     INT            - semana relativa (1, 2, 3 ...)
+    Semana     INT            - semana secuencial (1, 2, 3 ...)
     Valor      DECIMAL(18,2)  - monto proyectado (0 si no hay datos)
 
   PIVOT: usar dbo.CashflowPivot con @FunctionName = 'CashflowDataProjection'
@@ -38,41 +39,36 @@ GO
 
 CREATE OR ALTER FUNCTION dbo.CashflowDataProjection
 (
-    @SemanaInicial INT,
-    @SemanaFinal   INT,
-    @Moneda        VARCHAR(3),
-    @FechaBase     DATE = NULL   -- NULL usa GETDATE() (llamada directa / retrocompatible)
+    @FechaInicial DATE,
+    @FechaFinal   DATE,
+    @Moneda       VARCHAR(3)
 )
 RETURNS TABLE
 AS
 RETURN
 (
-    WITH Numeros AS
-    (
-        SELECT @SemanaInicial AS Semana
-        UNION ALL
-        SELECT Semana + 1
-        FROM   Numeros
-        WHERE  Semana + 1 <= @SemanaFinal
-    ),
-
-    FechaSemana AS
+    WITH Semanas AS
     (
         SELECT
-            Semana,
-            DATEADD(WEEK, Semana, ISNULL(@FechaBase, CAST(GETDATE() AS DATE))) AS FechaInicio
-        FROM Numeros
+            1 AS Semana,
+            @FechaInicial AS LunesSemana
+        UNION ALL
+        SELECT
+            Semana + 1,
+            DATEADD(WEEK, 1, LunesSemana)
+        FROM Semanas
+        WHERE DATEADD(WEEK, 1, LunesSemana) <= @FechaFinal
     ),
 
     SemanaISO AS
     (
         SELECT
             Semana,
-            FechaInicio,
+            LunesSemana,
             -- ISO year: ano al que pertenece la ISO week
-            YEAR(DATEADD(DAY, 26 - DATEPART(ISO_WEEK, FechaInicio), FechaInicio)) AS ISOYear,
-            DATEPART(ISO_WEEK, FechaInicio) AS ISOWeek
-        FROM FechaSemana
+            YEAR(DATEADD(DAY, 26 - DATEPART(ISO_WEEK, LunesSemana), LunesSemana)) AS ISOYear,
+            DATEPART(ISO_WEEK, LunesSemana) AS ISOWeek
+        FROM Semanas
     ),
 
     TRMSemana AS
@@ -82,7 +78,7 @@ RETURN
             ISNULL((
                 SELECT TOP 1 VALOR
                 FROM MTCAMBIO c
-                WHERE c.FECHA <= s.FechaInicio
+                WHERE c.FECHA <= s.LunesSemana
                 ORDER BY c.FECHA DESC
             ), 1) AS TRM
         FROM SemanaISO s
@@ -116,12 +112,12 @@ RETURN
         cat.Category,
         cat.ParentName   AS Concepto,
         cat.ItemOrder,
-        n.Semana,
+        s.Semana,
         ISNULL(pa.Valor, 0) AS Valor
     FROM dbo.CashflowCategory cat
-    CROSS JOIN Numeros n
+    CROSS JOIN Semanas s
     LEFT JOIN ProyeccionAgrupada pa
         ON pa.CashflowCategoryId = cat.Id
-       AND pa.Semana = n.Semana
+       AND pa.Semana = s.Semana
 );
 GO

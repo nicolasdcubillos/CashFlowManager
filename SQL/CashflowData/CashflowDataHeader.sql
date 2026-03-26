@@ -9,15 +9,15 @@ GO
                  Incluye saldo COP, saldo USD convertido, prestamos y
                  total disponible en bancos.
   Autor        : CC Sistemas
-  Fecha        : 2026-03-02
+  Fecha        : 2026-03-26
 ================================================================================
 
-  FUNCION  dbo.CashflowDataHeader (@SemanaInicial, @SemanaFinal, @Moneda)
+  FUNCION  dbo.CashflowDataHeader (@FechaInicial, @FechaFinal, @Moneda)
   -----------------------------------------------------------------------
   Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto de
   saldo y por cada semana del rango indicado. Internamente construye:
-    - Numeros / FechaSemana : rango de semanas con la fecha de inicio de
-                              cada una (base dinamica: GETDATE()).
+    - Semanas               : genera semanas (lunes a domingo) desde
+                              @FechaInicial hasta @FechaFinal.
     - TRM                   : consulta la tasa de cambio vigente en MTCAMBIO
                               para la fecha de inicio de cada semana.
     - Saldos                : acumula movimientos bancarios (MVBANCOS) hasta
@@ -34,49 +34,45 @@ GO
 
 CREATE OR ALTER FUNCTION dbo.CashflowDataHeader
 (
-    @SemanaInicial INT,
-    @SemanaFinal   INT,
-    @Moneda        VARCHAR(3),
-    @FechaBase     DATE = NULL   -- NULL usa GETDATE() (llamada directa / retrocompatible)
+    @FechaInicial DATE,
+    @FechaFinal   DATE,
+    @Moneda       VARCHAR(3)
 )
 RETURNS TABLE
 AS
 RETURN
 (
-    WITH Numeros AS
+    WITH Semanas AS
     (
-        SELECT @SemanaInicial AS Semana
+        SELECT
+            1 AS Semana,
+            @FechaInicial AS LunesSemana
         UNION ALL
-        SELECT Semana + 1
-        FROM Numeros
-        WHERE Semana + 1 <= @SemanaFinal
-    ),
-
-    FechaSemana AS
-    (
-        SELECT 
-            Semana,
-            DATEADD(WEEK, Semana, ISNULL(@FechaBase, CAST(GETDATE() AS DATE))) AS FechaInicio
-        FROM Numeros
+        SELECT
+            Semana + 1,
+            DATEADD(WEEK, 1, LunesSemana)
+        FROM Semanas
+        WHERE DATEADD(WEEK, 1, LunesSemana) <= @FechaFinal
     ),
 
     TRM AS
     (
         SELECT 
-            f.Semana,
+            s.Semana,
+            s.LunesSemana,
             ISNULL((
                 SELECT TOP 1 VALOR
                 FROM MTCAMBIO
-                WHERE FECHA <= f.FechaInicio
+                WHERE FECHA <= s.LunesSemana
                 ORDER BY FECHA DESC
             ),1) AS TRM
-        FROM FechaSemana f
+        FROM Semanas s
     ),
 
     Saldos AS
     (
         SELECT 
-            f.Semana,
+            s.Semana,
             t.TRM,
 
             SUM(CASE WHEN MB.OTRAMON = 'N' THEN MV.VALOR ELSE 0 END) AS SaldoCOP,
@@ -90,17 +86,17 @@ RETURN
                           AND MB.OTRAMON = 'S'
                      THEN MV.VALOR ELSE 0 END) AS PrestamosUSD
 
-        FROM FechaSemana f
+        FROM Semanas s
 
-        LEFT JOIN TRM t ON t.Semana = f.Semana
+        LEFT JOIN TRM t ON t.Semana = s.Semana
 
         LEFT JOIN MVBANCOS MV 
-               ON MV.FECHA <= f.FechaInicio
+               ON MV.FECHA <= s.LunesSemana
 
         LEFT JOIN MTBANCOS MB 
                ON MB.CODIGOCTA = MV.CODIGOCTA
 
-        GROUP BY f.Semana, t.TRM
+        GROUP BY s.Semana, t.TRM
     )
 
     -- Saldo COP: si piden USD se divide por TRM

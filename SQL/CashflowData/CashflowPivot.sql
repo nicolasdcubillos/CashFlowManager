@@ -7,7 +7,7 @@ GO
   Descripcion  : SP generico que transpone cualquier funcion del flujo de
                  caja en una matriz donde cada columna es un numero de semana.
   Autor        : CC Sistemas
-  Fecha        : 2026-03-25
+  Fecha        : 2026-03-26
 ================================================================================
 
   PROCEDIMIENTO  dbo.CashflowPivot
@@ -16,8 +16,8 @@ GO
     @FunctionName  : nombre exacto de la funcion TVF a pivotar.
                      Solo se aceptan los valores de la lista blanca interna
                      para prevenir inyeccion SQL.
-    @SemanaInicial : numero de semana relativo al inicio del rango.
-    @SemanaFinal   : numero de semana relativo al fin del rango.
+    @FechaInicial  : fecha de inicio del rango (DATE). Debe ser lunes.
+    @FechaFinal    : fecha de fin del rango (DATE). Incluye hasta ese dia.
     @Moneda        : 'COP' o 'USD'.
     @Category      : (opcional) filtra por Category cuando la funcion
                      retorna varias categorias (ej. CashflowDataProjection).
@@ -40,28 +40,26 @@ GO
   o, para Header, por orden hardcodeado en la propia funcion).
 
   Ejemplo de uso:
-    EXEC dbo.CashflowPivot 'CashflowDataEgresos',   1,  6, 'COP';
-    EXEC dbo.CashflowPivot 'CashflowDataIngresos', -3,  3, 'USD';
-    EXEC dbo.CashflowPivot 'CashflowDataHeader',    0,  5, 'COP';
-    EXEC dbo.CashflowPivot 'CashflowDataProjection', 1, 6, 'USD', 'INGRESOS';
+    EXEC dbo.CashflowPivot 'CashflowDataEgresos',   '2026-01-12', '2026-04-05', 'COP';
+    EXEC dbo.CashflowPivot 'CashflowDataIngresos',   '2026-01-12', '2026-04-05', 'USD';
+    EXEC dbo.CashflowPivot 'CashflowDataHeader',     '2026-01-12', '2026-04-05', 'COP';
+    EXEC dbo.CashflowPivot 'CashflowDataProjection', '2026-03-30', '2026-04-05', 'USD', 'INGRESOS';
 ================================================================================
 */
 
 CREATE OR ALTER PROCEDURE dbo.CashflowPivot
 (
     @FunctionName  SYSNAME,
-    @SemanaInicial INT,
-    @SemanaFinal   INT,
+    @FechaInicial  DATE,
+    @FechaFinal    DATE,
     @Moneda        VARCHAR(3),
-    @Category      VARCHAR(20) = NULL,
-    @FechaBase     DATE        = NULL   -- NULL → los TVFs usan GETDATE() internamente
+    @Category      VARCHAR(20) = NULL
 )
 AS
 BEGIN
     SET NOCOUNT ON;
 
     -- Lista blanca: unico punto de control contra SQL injection.
-    -- Agregar aqui cualquier nueva funcion antes de usarla.
     IF @FunctionName NOT IN (
         'CashflowDataHeader',
         'CashflowDataIngresos',
@@ -74,47 +72,48 @@ BEGIN
     IF @Moneda NOT IN ('COP', 'USD')
         THROW 50002, 'Moneda no valida. Use COP o USD.', 1;
 
-    IF @SemanaInicial > @SemanaFinal
-        THROW 50003, '@SemanaInicial no puede ser mayor que @SemanaFinal.', 1;
+    IF @FechaInicial > @FechaFinal
+        THROW 50003, '@FechaInicial no puede ser mayor que @FechaFinal.', 1;
 
     IF @Category IS NOT NULL AND @Category NOT IN ('INGRESOS', 'EGRESOS', 'FINANCIAMIENTO')
         THROW 50004, 'Categoria no valida. Use INGRESOS, EGRESOS o FINANCIAMIENTO.', 1;
 
-    DECLARE @Columnas     NVARCHAR(MAX);
-    DECLARE @SQL          NVARCHAR(MAX);
-    DECLARE @Where        NVARCHAR(100) = '';
-    -- @FechaBase es DATE → CONVERT es seguro, sin riesgo de inyeccion
-    DECLARE @FechaBaseStr NVARCHAR(14) =
-        CASE WHEN @FechaBase IS NOT NULL
-             THEN '''' + CONVERT(VARCHAR(10), @FechaBase, 120) + ''''
-             ELSE 'NULL'
-        END;
+    -- Calcular cuantas semanas hay en el rango y generar columnas [1],[2],...,[N]
+    DECLARE @NumSemanas INT = DATEDIFF(WEEK, @FechaInicial, @FechaFinal) + 1;
+    DECLARE @Columnas   NVARCHAR(MAX);
+    DECLARE @SQL        NVARCHAR(MAX);
+    DECLARE @Where      NVARCHAR(100) = '';
 
     ;WITH Numeros AS
     (
-        SELECT @SemanaInicial AS Semana
+        SELECT 1 AS Semana
         UNION ALL
         SELECT Semana + 1
         FROM   Numeros
-        WHERE  Semana + 1 <= @SemanaFinal
+        WHERE  Semana + 1 <= @NumSemanas
     )
-    SELECT @Columnas = STRING_AGG(QUOTENAME(Semana), ',')
+    SELECT @Columnas = STRING_AGG(QUOTENAME('S' + CAST(Semana AS VARCHAR(10))), ',')
     FROM   Numeros
     OPTION (MAXRECURSION 1000);
 
     IF @Category IS NOT NULL
         SET @Where = ' WHERE Category = @pCategory';
 
+    -- Fechas como strings seguros para SQL dinamico (DATE → no hay riesgo de inyeccion)
+    DECLARE @FechaIniStr NVARCHAR(12) = '''' + CONVERT(VARCHAR(10), @FechaInicial, 120) + '''';
+    DECLARE @FechaFinStr NVARCHAR(12) = '''' + CONVERT(VARCHAR(10), @FechaFinal,   120) + '''';
+
     SET @SQL = '
         SELECT *
         FROM
         (
-            SELECT Concepto, ItemOrder, Semana, Valor
+            SELECT Concepto, ItemOrder,
+                   ''S'' + CAST(Semana AS VARCHAR(10)) AS Semana,
+                   Valor
             FROM dbo.' + QUOTENAME(@FunctionName) + '('
-            + CAST(@SemanaInicial AS VARCHAR(10)) + ','
-            + CAST(@SemanaFinal   AS VARCHAR(10)) + ','''
-            + @Moneda + ''','
-            + @FechaBaseStr + ')'
+            + @FechaIniStr + ','
+            + @FechaFinStr + ','''
+            + @Moneda + ''')'
             + @Where + '
         ) AS src
         PIVOT

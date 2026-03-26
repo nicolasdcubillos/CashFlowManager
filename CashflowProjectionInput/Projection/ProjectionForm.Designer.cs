@@ -1,6 +1,6 @@
-﻿namespace CashflowProjectionInput
+﻿namespace CashFlowManager.UI
 {
-    partial class Form1
+    partial class ProjectionForm
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -209,14 +209,6 @@
             this.nudSemana.ValueChanged += new System.EventHandler(this.nudSemana_ValueChanged);
             this.nudSemana.TextChanged  += new System.EventHandler(this.nudSemana_TextChanged);
 
-            // ── lblFiltroHint ─────────────────────────────────────────────
-            this.lblFiltroHint.AutoSize  = true;
-            this.lblFiltroHint.Font      = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Italic);
-            this.lblFiltroHint.ForeColor = System.Drawing.Color.FromArgb(180, 183, 189);
-            this.lblFiltroHint.Location  = new System.Drawing.Point(280, 12);
-            this.lblFiltroHint.TabIndex  = 4;
-            this.lblFiltroHint.Text      = "(0 = todos los per\u00edodos)";
-
             // ── pnlFilter ───────────────────────────────────────────────
             this.pnlFilter.BackColor = System.Drawing.Color.FromArgb(240, 244, 248);
             this.pnlFilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -344,7 +336,7 @@
             this.pnlFooter.Size      = new System.Drawing.Size(900, 28);
             this.pnlFooter.TabIndex  = 3;
 
-            // ── Form1 ──────────────────────────────────────────────────────
+            // ── ProjectionForm ─────────────────────────────────────────────
             // IMPORTANTE: el orden de Controls.Add determina el docking.
             // Fill primero, luego Bottom, luego Top en orden inverso al visual.
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -358,7 +350,7 @@
             this.Controls.Add(this.pnlHeader);
             this.Font            = new System.Drawing.Font("Segoe UI", 9F);
             this.MinimumSize     = new System.Drawing.Size(600, 400);
-            this.Name            = "Form1";
+            this.Name            = "ProjectionForm";
             this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text            = "Flujo de Caja \u2014 Proyectado";
 

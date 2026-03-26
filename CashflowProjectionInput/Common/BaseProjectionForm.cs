@@ -4,7 +4,7 @@ using System.Data.Odbc;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace CashflowProjectionInput
+namespace CashFlowManager.UI
 {
     /// <summary>
     /// Formulario base reutilizable.

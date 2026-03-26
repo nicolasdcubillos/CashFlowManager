@@ -131,3 +131,36 @@ BEGIN
             FOREIGN KEY (CashflowCategoryId)
             REFERENCES dbo.CashflowCategory (Id);
 END
+
+-- ===========================================================
+--  ALTER: TRADE — agregar columna FechaCobro
+--  Agrega FechaCobro (datetime, nullable) para almacenar
+--  la fecha de cobro asignada desde el front de consulta.
+-- ===========================================================
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM   INFORMATION_SCHEMA.COLUMNS
+    WHERE  TABLE_SCHEMA = 'dbo'
+      AND  TABLE_NAME   = 'TRADE'
+      AND  COLUMN_NAME  = 'FechaCobro'
+)
+BEGIN
+    ALTER TABLE dbo.TRADE
+        ADD FechaCobro DATETIME NULL;
+END
+
+-- ===========================================================
+--  Configuración: agregar ORIGEN a CashflowManagerConfig
+--  si no existe, para indicar el origen por defecto a filtrar.
+-- ===========================================================
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM   dbo.CashflowManagerConfig
+    WHERE  Config = 'ORIGEN'
+)
+BEGIN
+    INSERT INTO dbo.CashflowManagerConfig (Config, Value)
+    VALUES ('ORIGEN', 'FAC');
+END

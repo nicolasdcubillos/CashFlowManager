@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace CashflowProjectionInput
+namespace CashFlowManager.UI
 {
     internal static class Program
     {
@@ -24,11 +24,13 @@ namespace CashflowProjectionInput
             Form form;
             switch (screen)
             {
+                case "documento":  form = new DocumentQueryForm();     break;
+                case "proveedores": form = new ProveedorCategoryForm(); break;
                 // Nuevas pantallas se registran aquí:
                 // case "egresos":  form = new EgresosForm();  break;
                 // case "ingresos": form = new IngresosForm(); break;
                 // case "flujo":    form = new FlujoForm();    break;
-                default: form = new Form1(); break;
+                default: form = new ProjectionForm(); break;
             }
 
             Application.Run(form);

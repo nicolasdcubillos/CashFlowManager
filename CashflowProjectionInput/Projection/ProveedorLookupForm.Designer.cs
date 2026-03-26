@@ -1,4 +1,4 @@
-namespace CashflowProjectionInput
+namespace CashFlowManager.UI
 {
     partial class ProveedorLookupForm
     {

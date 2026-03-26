@@ -34,7 +34,7 @@ FUNCTION generarCashFlowExcelFecha
     ldFechaInicial    = ldFechaBase - (tnSemanasAtras * 7)
     ldFechaFinalRango = ldFechaBase + (tnSemanasAdelante * 7) + 6
 
-    RETURN GenerarCashFlowExcel(tdFechaFinal, tnSemanasAtras, tnSemanasAdelante, ;>
+    RETURN GenerarCashFlowExcel(tdFechaFinal, tnSemanasAtras, tnSemanasAdelante, ;
                                 ldFechaInicial, ldFechaFinalRango)
 ENDFUNC
 
@@ -399,8 +399,8 @@ FUNCTION ArmarDataCashFlowHistorico
 	*========================================
 	WAIT WINDOW "Dibujando header financiero " + tcMoneda + "..." NOWAIT
 	lnFilaActual = DibujarCashflowHeader(loHoja, ;
-	                                     lcFechaIniHist, ;
-	                                     lcFechaFinHist, ;
+	                                     lcFechaIni, ;
+	                                     lcFechaFin, ;
 	                                     tcMoneda)
 
     *========================================
@@ -632,8 +632,8 @@ ENDFUNC
 *-----------------------------------------------------------
 FUNCTION DibujarCashflowHeader
     LPARAMETERS loHoja, ;
-                tnSemanaInicial, ;
-                tnSemanaFinal, ;
+                tcFechaInicial, ;
+                tcFechaFinal, ;
                 tcMoneda
 
     LOCAL lcSQL, lnResult, laError[1]
@@ -644,9 +644,9 @@ FUNCTION DibujarCashflowHeader
     WAIT WINDOW "Ejecutando consulta Header " + tcMoneda + "..." NOWAIT
 
     lcSQL = ;
-	    "EXEC dbo.CashflowPivot 'CashflowDataHeader', " + ;
-	    ALLTRIM(STR(tnSemanaInicial)) + ", " + ;
-	    ALLTRIM(STR(tnSemanaFinal)) + ", '" + ;
+	    "EXEC dbo.CashflowPivot 'CashflowDataHeader', '" + ;
+	    tcFechaInicial + "', '" + ;
+	    tcFechaFinal + "', '" + ;
 	    tcMoneda + "'"
 
     lnResult = SQLEXEC(ON, lcSQL, "csrHeader")

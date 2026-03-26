@@ -1,14 +1,13 @@
 ﻿using System;
-using System;
 using System.Configuration;
 using System.Data;
 using System.Data.Odbc;
 using System.Text;
 using System.Windows.Forms;
 
-namespace CashflowProjectionInput
+namespace CashFlowManager.UI
 {
-    public partial class Form1 : Form
+    public partial class ProjectionForm : Form
     {
         // ── Configuración ──────────────────────────────────────────────
         private string ConnStr =>
@@ -26,7 +25,7 @@ namespace CashflowProjectionInput
         private DataTable _dt;
         private OdbcDataAdapter _adapter;
 
-        public Form1()
+        public ProjectionForm()
         {
             InitializeComponent();
             _dt = ConstruirTablaVacia();
