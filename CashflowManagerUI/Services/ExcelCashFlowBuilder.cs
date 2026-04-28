@@ -3,10 +3,10 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
-using CashflowDataGenerator.Data;
+using CashFlowManager.UI.Data;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace CashflowDataGenerator.Services
+namespace CashFlowManager.UI.Services
 {
     /// <summary>
     /// Genera el archivo Excel de Flujo de Caja.
@@ -15,12 +15,12 @@ namespace CashflowDataGenerator.Services
     internal class ExcelCashFlowBuilder : IDisposable
     {
         // ── Paleta de colores ───────────────────────────────────────
-        private const int ColorBlanco      = 16777215; // RGB(255,255,255)
-        private const int ColorTituloFuente = 0;       // RGB(0,0,0)
-        private const int ColorHeaderFondo = 12419407;  // #4F81BD
-        private const int ColorFilaPar     = 15853019;  // #DBE5F1
-        private const int ColorFilaImpar   = 16777215;  // blanco
-        private const int ColorTotales     = 14341079;  // #D7D3DA
+        private const int ColorBlanco       = 16777215; // RGB(255,255,255)
+        private const int ColorTituloFuente = 0;        // RGB(0,0,0)
+        private const int ColorHeaderFondo  = 12419407; // #4F81BD
+        private const int ColorFilaPar      = 15853019; // #DBE5F1
+        private const int ColorFilaImpar    = 16777215; // blanco
+        private const int ColorTotales      = 14341079; // #D7D3DA
 
         private static readonly string[] Meses =
         {
@@ -31,13 +31,13 @@ namespace CashflowDataGenerator.Services
         private const string NumFmt = "#.##0";
 
         private Excel.Application _app;
-        private Excel.Workbook _libro;
-        private bool _disposed;
+        private Excel.Workbook    _libro;
+        private bool              _disposed;
 
         // ── Parámetros del flujo ────────────────────────────────────
         private readonly DateTime _fechaFinal;
-        private readonly int _semanasAtras;
-        private readonly int _semanasAdelante;
+        private readonly int      _semanasAtras;
+        private readonly int      _semanasAdelante;
         private readonly DateTime _fechaBase;
         private readonly DateTime _fechaInicial;
         private readonly DateTime _fechaFinalRango;
@@ -47,16 +47,16 @@ namespace CashflowDataGenerator.Services
 
         public ExcelCashFlowBuilder(DateTime fechaFinal)
         {
-            _fechaFinal = fechaFinal;
-            _semanasAtras = int.Parse(CashFlowRepository.ReadConfig("SemanasAtras", "6"));
+            _fechaFinal      = fechaFinal;
+            _semanasAtras    = int.Parse(CashFlowRepository.ReadConfig("SemanasAtras",    "6"));
             _semanasAdelante = int.Parse(CashFlowRepository.ReadConfig("SemanasAdelante", "6"));
 
             // Lunes de la semana de fechaFinal
-            int dow = ((int)fechaFinal.DayOfWeek + 6) % 7; // 0=lun
-            _fechaBase = fechaFinal.AddDays(-dow);
+            int dow     = ((int)fechaFinal.DayOfWeek + 6) % 7; // 0=lun
+            _fechaBase  = fechaFinal.AddDays(-dow);
 
-            _fechaInicial = _fechaBase.AddDays(-_semanasAtras * 7);
-            _fechaFinalRango = _fechaBase.AddDays(_semanasAdelante * 7 + 6);
+            _fechaInicial     = _fechaBase.AddDays(-_semanasAtras * 7);
+            _fechaFinalRango  = _fechaBase.AddDays(_semanasAdelante * 7 + 6);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace CashflowDataGenerator.Services
             string nombreArchivo = $"FlujoDeCaja_Intecplast_{Meses[_fechaFinal.Month]}{_fechaFinal.Year}.xlsx";
             string ruta = Path.Combine(Directory.GetCurrentDirectory(), nombreArchivo);
 
-            _app = new Excel.Application { Visible = true };
+            _app   = new Excel.Application { Visible = true };
             _libro = _app.Workbooks.Add();
 
             // ─── Hoja 1: USD ────────────────────────────────────────
@@ -130,9 +130,9 @@ namespace CashflowDataGenerator.Services
             string mes = Meses[_fechaFinal.Month];
             hoja.Cells[2, 2] = $"Flujo de Caja {mes} {_fechaFinal.Year} - Intecplast SAS";
             var rB2 = (Excel.Range)hoja.Range["B2"];
-            rB2.Font.Name = "Calibri";
-            rB2.Font.Size = 14;
-            rB2.Font.Bold = true;
+            rB2.Font.Name   = "Calibri";
+            rB2.Font.Size   = 14;
+            rB2.Font.Bold   = true;
             rB2.Font.Italic = true;
 
             if (moneda == "USD")
@@ -178,20 +178,20 @@ namespace CashflowDataGenerator.Services
 
             // Fila 5: header azul
             var rF5 = hoja.Range[hoja.Cells[5, 2], hoja.Cells[5, ultimaCol]];
-            rF5.Font.Name = "Calibri";
-            rF5.Font.Size = 11;
-            rF5.Font.Bold = true;
-            rF5.Font.Color = ColorTituloFuente;
+            rF5.Font.Name      = "Calibri";
+            rF5.Font.Size      = 11;
+            rF5.Font.Bold      = true;
+            rF5.Font.Color     = ColorTituloFuente;
             rF5.Interior.Color = ColorHeaderFondo;
 
             // Fila 6: fechas gris
             var rF6 = hoja.Range[hoja.Cells[6, 2], hoja.Cells[6, ultimaCol]];
             rF6.Interior.Color = ColorFilaPar;
-            rF6.Font.Color = ColorTituloFuente;
+            rF6.Font.Color     = ColorTituloFuente;
 
             // Bordes header
             hoja.Range[hoja.Cells[5, 2], hoja.Cells[6, ultimaCol]].Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-            hoja.Range[hoja.Cells[5, 2], hoja.Cells[6, ultimaCol]].Borders.Weight = Excel.XlBorderWeight.xlThin;
+            hoja.Range[hoja.Cells[5, 2], hoja.Cells[6, ultimaCol]].Borders.Weight    = Excel.XlBorderWeight.xlThin;
         }
 
         // ─── Data: header + ingresos + egresos + flujo económico ───
@@ -205,8 +205,8 @@ namespace CashflowDataGenerator.Services
             int colProy = 3 + _semanasAtras + 1;
 
             // Rango solo-proyección: lunes de la primera semana futura → fin
-            DateTime fechaIniProy = _fechaInicial.AddDays((_semanasAtras + 1) * 7);
-            string fechaIniProy_s = fechaIniProy.ToString("yyyy-MM-dd");
+            DateTime fechaIniProy   = _fechaInicial.AddDays((_semanasAtras + 1) * 7);
+            string   fechaIniProy_s = fechaIniProy.ToString("yyyy-MM-dd");
 
             // ── 1) Header financiero (labels hard-coded, sin consulta DB) ─
             const int filaHdrCOP     = 8;
@@ -223,11 +223,10 @@ namespace CashflowDataGenerator.Services
             hoja.Cells[filaCredicorp,  2] = "PA Credicorp - Excedentes";
             hoja.Cells[filaDispBancos, 2] = "Disponible Bancos";
 
-            // Estilo filas de datos del header (igual que DibujarDataTable: color alterno + bordes + NumFmt en rango)
             foreach (int r in new[] { filaHdrCOP, filaHdrUSD, filaCredicorp, filaDispBancos })
             {
                 var rFila = hoja.Range[hoja.Cells[r, 2], hoja.Cells[r, ultimaColHdr]];
-                rFila.Interior.Color = ColorAlternar(r);
+                rFila.Interior.Color    = ColorAlternar(r);
                 rFila.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
                 rFila.Borders.Weight    = Excel.XlBorderWeight.xlThin;
                 hoja.Range[hoja.Cells[r, 3], hoja.Cells[r, ultimaColHdr]].NumberFormat = NumFmt;
@@ -274,8 +273,6 @@ namespace CashflowDataGenerator.Services
             }
             else // COP: todo se deriva de la hoja USD — cero llamadas a BD
             {
-                // Row 9: USD balance × TRM → COP
-                // Row 8, col 3: (COP/TRM) × TRM → COP  (invierte la conversión de la hoja USD)
                 Report("Aplicando fórmulas de saldo de bancos desde hoja USD...");
                 for (int c = 3; c <= ultimaColHdr; c++)
                 {
@@ -289,7 +286,6 @@ namespace CashflowDataGenerator.Services
                     $"='CF I Q-AJUSTADO USD'!{c3}{filaHdrCOP}*'CF I Q-AJUSTADO USD'!{c3}3";
                 ((Excel.Range)hoja.Cells[filaHdrCOP, 3]).NumberFormat = NumFmt;
 
-                // Row 10, col 3: PA Credicorp - Excedentes — invierte TRM desde hoja USD
                 ((Excel.Range)hoja.Cells[filaCredicorp, 3]).Formula =
                     $"='CF I Q-AJUSTADO USD'!{c3}{filaCredicorp}*'CF I Q-AJUSTADO USD'!{c3}3";
                 ((Excel.Range)hoja.Cells[filaCredicorp, 3]).NumberFormat = NumFmt;
@@ -376,10 +372,6 @@ namespace CashflowDataGenerator.Services
         //  MÉTODOS DE DIBUJO
         // ═════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Ejecuta CashflowPivot y dibuja las filas resultantes.
-        /// Retorna la fila siguiente disponible.
-        /// </summary>
         private int DibujarSeccionPivot(Excel.Worksheet hoja, int fila,
             string functionName, string fechaIni, string fechaFin,
             string moneda, string label)
@@ -389,28 +381,21 @@ namespace CashflowDataGenerator.Services
             return DibujarDataTable(hoja, dt, fila);
         }
 
-        /// <summary>
-        /// Dibuja un DataTable en Excel omitiendo ItemOrder.
-        /// Retorna la fila siguiente disponible.
-        /// </summary>
         private int DibujarDataTable(Excel.Worksheet hoja, DataTable dt, int fila)
         {
             foreach (DataRow row in dt.Rows)
             {
-                int excelCol = 2;
+                int excelCol    = 2;
                 int lastExcelCol = 2;
 
-                // Contar columnas visibles (sin ItemOrder)
                 foreach (DataColumn dc in dt.Columns)
                     if (!dc.ColumnName.Equals("ItemOrder", StringComparison.OrdinalIgnoreCase))
                         lastExcelCol++;
-                lastExcelCol--; // ajuste
+                lastExcelCol--;
 
-                // Color alterno en toda la fila
                 hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, lastExcelCol]]
                     .Interior.Color = ColorAlternar(fila);
 
-                // Escribir valores
                 excelCol = 2;
                 foreach (DataColumn dc in dt.Columns)
                 {
@@ -420,15 +405,13 @@ namespace CashflowDataGenerator.Services
                     excelCol++;
                 }
 
-                // Formato numérico en columnas de datos (col 3+)
                 if (lastExcelCol > 2)
                     hoja.Range[hoja.Cells[fila, 3], hoja.Cells[fila, lastExcelCol]]
                         .NumberFormat = NumFmt;
 
-                // Bordes
                 var rBorde = hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, lastExcelCol]];
                 rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-                rBorde.Borders.Weight = Excel.XlBorderWeight.xlThin;
+                rBorde.Borders.Weight    = Excel.XlBorderWeight.xlThin;
 
                 fila++;
             }
@@ -436,9 +419,6 @@ namespace CashflowDataGenerator.Services
             return fila;
         }
 
-        /// <summary>
-        /// Suma valores de proyección sobre las celdas existentes (no sobreescribe).
-        /// </summary>
         private void SumarProyeccion(Excel.Worksheet hoja, int filaInicio, int colInicio,
             string functionName, string fechaIni, string fechaFin,
             string moneda, string category)
@@ -462,9 +442,8 @@ namespace CashflowDataGenerator.Services
 
                     if (valorProy != 0m)
                     {
-                        object existing = ((Excel.Range)hoja.Cells[filaActual, excelCol]).Value2;
-                        decimal valorExist = existing == null ? 0m
-                            : Convert.ToDecimal(existing);
+                        object  existing   = ((Excel.Range)hoja.Cells[filaActual, excelCol]).Value2;
+                        decimal valorExist = existing == null ? 0m : Convert.ToDecimal(existing);
                         hoja.Cells[filaActual, excelCol] = (double)(valorExist + valorProy);
                     }
 
@@ -475,19 +454,16 @@ namespace CashflowDataGenerator.Services
                 {
                     var rango = hoja.Range[hoja.Cells[filaActual, colInicio],
                         hoja.Cells[filaActual, excelCol - 1]];
-                    rango.NumberFormat = NumFmt;
-                    rango.Interior.Color = ColorAlternar(filaActual);
+                    rango.NumberFormat    = NumFmt;
+                    rango.Interior.Color  = ColorAlternar(filaActual);
                     rango.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-                    rango.Borders.Weight = Excel.XlBorderWeight.xlThin;
+                    rango.Borders.Weight    = Excel.XlBorderWeight.xlThin;
                 }
 
                 filaActual++;
             }
         }
 
-        /// <summary>
-        /// Dibuja título de sección (Ingresos, Egresos, etc.) con formato bold.
-        /// </summary>
         private int DibujarTituloSeccion(Excel.Worksheet hoja, int fila, string titulo)
         {
             int ultimaCol = GetUltimaColumna(hoja, fila - 1);
@@ -501,9 +477,6 @@ namespace CashflowDataGenerator.Services
             return fila + 1;
         }
 
-        /// <summary>
-        /// Dibuja subtotal con fórmulas SUM por columna.
-        /// </summary>
         private int DibujarSubtotal(Excel.Worksheet hoja, int filaInicio,
             int filaFin, int filaSubtotal, string titulo)
         {
@@ -517,10 +490,10 @@ namespace CashflowDataGenerator.Services
 
             for (int c = 3; c <= ultimaCol; c++)
             {
-                string letra = ColumnaLetra(c);
+                string letra   = ColumnaLetra(c);
                 string formula = $"=SUM({letra}{filaInicio}:{letra}{filaFin})";
 
-                ((Excel.Range)hoja.Cells[filaSubtotal, c]).Formula = formula;
+                ((Excel.Range)hoja.Cells[filaSubtotal, c]).Formula   = formula;
                 ((Excel.Range)hoja.Cells[filaSubtotal, c]).Font.Bold = true;
             }
 
@@ -529,14 +502,11 @@ namespace CashflowDataGenerator.Services
 
             var rBorde = hoja.Range[hoja.Cells[filaSubtotal, 2], hoja.Cells[filaSubtotal, ultimaCol]];
             rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-            rBorde.Borders.Weight = Excel.XlBorderWeight.xlThin;
+            rBorde.Borders.Weight    = Excel.XlBorderWeight.xlThin;
 
             return filaSubtotal;
         }
 
-        /// <summary>
-        /// Fila "Flujo de Caja Financiero" en 0.
-        /// </summary>
         private int DibujarFlujoCajaFinanciero(Excel.Worksheet hoja, int fila, int ultimaCol)
         {
             hoja.Cells[fila, 2] = "Flujo de Caja Financiero";
@@ -555,16 +525,11 @@ namespace CashflowDataGenerator.Services
 
             var rBorde = hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, ultimaCol]];
             rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-            rBorde.Borders.Weight = Excel.XlBorderWeight.xlThin;
+            rBorde.Borders.Weight    = Excel.XlBorderWeight.xlThin;
 
             return fila + 1;
         }
 
-        /// <summary>
-        /// Sección de totales: 7 conceptos fijos con color #D7D3DA.
-        /// "Disponible Bancos" = fórmula: Saldo inicial COP + Saldo inicial USD
-        /// referenciando las filas del header (filaHdrCOP y filaHdrUSD).
-        /// </summary>
         private void DibujarTotales(Excel.Worksheet hoja, int filaInicio, int ultimaCol,
             int filaHdrCOP, int filaHdrUSD)
         {
@@ -592,7 +557,6 @@ namespace CashflowDataGenerator.Services
                 {
                     if (esDisponible)
                     {
-                        // = Saldo inicial COP[col] + Saldo inicial USD[col] + PA Credicorp Excedentes[col]
                         string col = ColumnaLetra(c);
                         ((Excel.Range)hoja.Cells[fila, c]).Formula =
                             $"={col}{filaHdrCOP}+{col}{filaHdrUSD}+{col}{filaHdrCOP + 2}";
@@ -606,13 +570,11 @@ namespace CashflowDataGenerator.Services
 
                 var rBorde = hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, ultimaCol]];
                 rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
-                rBorde.Borders.Weight = Excel.XlBorderWeight.xlThin;
+                rBorde.Borders.Weight    = Excel.XlBorderWeight.xlThin;
 
                 fila++;
             }
         }
-
-
 
         // ═════════════════════════════════════════════════════════════
         //  UTILIDADES
@@ -658,7 +620,7 @@ namespace CashflowDataGenerator.Services
             _disposed = true;
 
             if (_libro != null) Marshal.ReleaseComObject(_libro);
-            if (_app != null) Marshal.ReleaseComObject(_app);
+            if (_app   != null) Marshal.ReleaseComObject(_app);
         }
     }
 }

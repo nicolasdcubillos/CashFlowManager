@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.Odbc;
 using System.Globalization;
 
-namespace CashflowDataGenerator.Data
+namespace CashFlowManager.UI.Data
 {
     /// <summary>
     /// Acceso a datos: ejecuta las TVFs y SPs del cashflow contra SQL Server.
@@ -131,7 +131,6 @@ namespace CashflowDataGenerator.Data
         /// </summary>
         private static void ConvertStringColumnsToDouble(DataTable dt)
         {
-            // Identificar columnas string que contengan números (saltar Concepto)
             for (int i = dt.Columns.Count - 1; i >= 0; i--)
             {
                 var col = dt.Columns[i];
@@ -142,7 +141,6 @@ namespace CashflowDataGenerator.Data
                 if (name == "CONCEPTO" || name == "ITEMORDER")
                     continue;
 
-                // Verificar si la primera fila no-nula es numérica
                 bool isNumeric = false;
                 foreach (DataRow row in dt.Rows)
                 {
@@ -156,7 +154,6 @@ namespace CashflowDataGenerator.Data
 
                 if (!isNumeric) continue;
 
-                // Crear columna double de reemplazo
                 string tmpName = col.ColumnName + "_tmp";
                 var newCol = new DataColumn(tmpName, typeof(double));
                 newCol.DefaultValue = 0.0;

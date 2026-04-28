@@ -1,11 +1,11 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using CashflowDataGenerator.Services;
+using CashFlowManager.UI.Services;
 
-namespace CashflowDataGenerator
+namespace CashFlowManager.UI
 {
-    public class MainForm : Form
+    public class GeneradorFlujoCajaForm : Form
     {
         // ── Controles ───────────────────────────────────────────────
         private readonly Panel          _pnlHeader  = new Panel();
@@ -38,7 +38,7 @@ namespace CashflowDataGenerator
         private readonly Panel          _pnlFooter  = new Panel();
         private readonly Label          _lblFooter  = new Label();
 
-        public MainForm()
+        public GeneradorFlujoCajaForm()
         {
             BuildUI();
 
@@ -60,7 +60,7 @@ namespace CashflowDataGenerator
             ((System.ComponentModel.ISupportInitialize)_nudSemana).BeginInit();
 
             // ── Form ────────────────────────────────────────────────
-            Text            = "Flujo de Caja - INTECPLAST";
+            Text            = "Generador Flujo de Caja";
             ClientSize      = new Size(520, 370);
             StartPosition   = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -159,15 +159,15 @@ namespace CashflowDataGenerator
             _lblRango.Font      = new Font("Segoe UI", 8.75F);
 
             // ── Botón generar ────────────────────────────────────────
-            _btnGenerar.Text                        = "Generar Excel";
-            _btnGenerar.Location                    = new Point(40, 128);
-            _btnGenerar.Size                        = new Size(420, 34);
-            _btnGenerar.BackColor                   = Color.FromArgb(30, 58, 95);
-            _btnGenerar.ForeColor                   = Color.White;
-            _btnGenerar.FlatStyle                   = FlatStyle.Flat;
-            _btnGenerar.FlatAppearance.BorderSize   = 0;
-            _btnGenerar.Cursor                      = Cursors.Hand;
-            _btnGenerar.Font                        = new Font("Segoe UI Semibold", 10F);
+            _btnGenerar.Text                      = "Generar Excel";
+            _btnGenerar.Location                  = new Point(40, 128);
+            _btnGenerar.Size                      = new Size(420, 34);
+            _btnGenerar.BackColor                 = Color.FromArgb(30, 58, 95);
+            _btnGenerar.ForeColor                 = Color.White;
+            _btnGenerar.FlatStyle                 = FlatStyle.Flat;
+            _btnGenerar.FlatAppearance.BorderSize = 0;
+            _btnGenerar.Cursor                    = Cursors.Hand;
+            _btnGenerar.Font                      = new Font("Segoe UI Semibold", 10F);
 
             // ── Barra de progreso ────────────────────────────────────
             _progress.Location              = new Point(40, 178);
@@ -218,11 +218,9 @@ namespace CashflowDataGenerator
         {
             bool esPorFecha = _rbFecha.Checked;
 
-            // Controles de modo fecha
             _lblFecha.Visible = esPorFecha;
             _dtpFecha.Visible = esPorFecha;
 
-            // Controles de modo semana ISO
             _lblAno.Visible    = !esPorFecha;
             _nudAno.Visible    = !esPorFecha;
             _lblSemana.Visible = !esPorFecha;
@@ -243,7 +241,7 @@ namespace CashflowDataGenerator
             if (week > maxWeeks)
             {
                 _nudSemana.Value = maxWeeks;
-                return; // se re-dispara ValueChanged
+                return;
             }
 
             DateTime lunes   = GetMondayOfWeek(year, week);
@@ -316,24 +314,20 @@ namespace CashflowDataGenerator
 
         // ── Utilidades de semana ISO ─────────────────────────────────
 
-        /// <summary>Retorna el lunes de la semana ISO (week) del año dado.</summary>
         private static DateTime GetMondayOfWeek(int year, int week)
         {
-            // El 4 de enero siempre cae en la semana 1 ISO.
-            var jan4 = new DateTime(year, 1, 4);
-            int dow  = ((int)jan4.DayOfWeek + 6) % 7; // 0 = lunes
-            DateTime week1Monday = jan4.AddDays(-dow);
-            return week1Monday.AddDays((week - 1) * 7);
+            var jan4     = new DateTime(year, 1, 4);
+            int dow      = ((int)jan4.DayOfWeek + 6) % 7;
+            DateTime w1  = jan4.AddDays(-dow);
+            return w1.AddDays((week - 1) * 7);
         }
 
-        /// <summary>Retorna el número de semana ISO de una fecha.</summary>
         private static int GetIsoWeek(DateTime date) =>
             System.Globalization.CultureInfo.InvariantCulture.Calendar
                 .GetWeekOfYear(date,
                     System.Globalization.CalendarWeekRule.FirstFourDayWeek,
                     DayOfWeek.Monday);
 
-        /// <summary>Retorna 52 o 53 según el año ISO.</summary>
         private static int IsoWeeksInYear(int year)
         {
             var jan1  = new DateTime(year, 1, 1);

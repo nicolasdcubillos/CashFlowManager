@@ -8,3 +8,5 @@ D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowMa
 D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.exe
 D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.pdb
 d:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.exe.config
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\Interop.Microsoft.Office.Interop.Excel.dll
+D:\NICOLASD\PERSONAL\CC SISTEMAS\OFIMATICA\INTECPLAST\CashFlowManager\CashflowManagerUI\obj\Debug\CashflowManagerUI.csproj.ResolveComReference.cache

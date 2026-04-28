@@ -5,37 +5,12 @@ namespace CashFlowManager.UI
 {
     internal static class Program
     {
-        /// <summary>
-        /// Punto de entrada. FoxPro puede pasar screen=nombre para abrir
-        /// una pantalla específica:
-        ///   RUN /N "CashflowManagerUI.exe" screen=proyeccion
-        /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            string screen = "configuracion";
-            foreach (var arg in args)
-                if (arg.StartsWith("screen=", StringComparison.OrdinalIgnoreCase))
-                    screen = arg.Substring(7).Trim().ToLower();
-
-            Form form;
-            switch (screen)
-            {
-                case "documento":      form = new DocumentQueryForm();          break;
-                case "proveedores":    form = new ProveedorCategoryForm();       break;
-                case "configuracion":  form = new CashflowConfigForm();          break;
-                case "bancos":         form = new BancosClassificationForm();    break;
-                // Nuevas pantallas se registran aquí:
-                // case "egresos":  form = new EgresosForm();  break;
-                // case "ingresos": form = new IngresosForm(); break;
-                // case "flujo":    form = new FlujoForm();    break;
-                default: form = new ProjectionForm(); break;
-            }
-
-            Application.Run(form);
+            Application.Run(new MainShellForm());
         }
     }
 }

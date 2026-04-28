@@ -47,6 +47,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <COMReference Include="Microsoft.Office.Interop.Excel">
+      <Guid>{00020813-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>9</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Forms\Common\BaseProjectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +85,14 @@
     <Compile Include="Forms\BankClassification\BancosClassificationForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\Generator\GeneradorFlujoCajaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Shell\MainShellForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Data\CashFlowRepository.cs" />
+    <Compile Include="Services\ExcelCashFlowBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
