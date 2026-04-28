@@ -19,7 +19,7 @@ GO
                               @FechaInicial hasta @FechaFinal.
     - TRMSemana             : TRM vigente por semana consultada en MTCAMBIO.
     - PagosProveedor        : suma abonos de cuentas por pagar (ABOCXP)
-                              filtrando por FECING dentro del rango de cada
+                              filtrando por FECHA1 dentro del rango de cada
                               semana. Convierte siempre a COP (VALOR * TCAMBIO)
                               y luego divide por TRM si se pide USD.
     - MovContables          : extrae debitos de nomina (cuentas 51x) e
@@ -84,8 +84,8 @@ RETURN
             ) AS Valor
         FROM TRMSemana t
         INNER JOIN ABOCXP a
-            ON a.FECING >= t.LunesSemana
-           AND a.FECING <  DATEADD(DAY, 7, t.LunesSemana)
+            ON a.FECHA1 >= t.LunesSemana
+           AND a.FECHA1 <  DATEADD(DAY, 7, t.LunesSemana)
            AND a.PAGADO = 1
         INNER JOIN MTPROCLI p
             ON p.NIT = a.NIT

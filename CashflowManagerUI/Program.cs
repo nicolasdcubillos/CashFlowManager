@@ -16,7 +16,7 @@ namespace CashFlowManager.UI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            string screen = "proyeccion";
+            string screen = "configuracion";
             foreach (var arg in args)
                 if (arg.StartsWith("screen=", StringComparison.OrdinalIgnoreCase))
                     screen = arg.Substring(7).Trim().ToLower();
@@ -24,9 +24,10 @@ namespace CashFlowManager.UI
             Form form;
             switch (screen)
             {
-                case "documento":      form = new DocumentQueryForm();     break;
-                case "proveedores":    form = new ProveedorCategoryForm(); break;
-                case "configuracion":  form = new CashflowConfigForm();    break;
+                case "documento":      form = new DocumentQueryForm();          break;
+                case "proveedores":    form = new ProveedorCategoryForm();       break;
+                case "configuracion":  form = new CashflowConfigForm();          break;
+                case "bancos":         form = new BancosClassificationForm();    break;
                 // Nuevas pantallas se registran aquí:
                 // case "egresos":  form = new EgresosForm();  break;
                 // case "ingresos": form = new IngresosForm(); break;

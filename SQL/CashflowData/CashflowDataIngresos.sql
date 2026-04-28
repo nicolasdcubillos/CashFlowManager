@@ -20,8 +20,9 @@ GO
     - TRMSemana             : TRM vigente por semana consultada en MTCAMBIO.
     - Datos                 : cruza facturas de venta (TRADE, ORIGEN='FAC')
                               con el maestro de clientes/proveedores (MTPROCLI),
-                              filtrando por FechaCobro (o FECING si no tiene)
-                              dentro del rango de cada semana, convirtiendo
+                              filtrando por FechaCobro (o FECHA1 si no tiene)
+                              dentro del rango de
+                              cada semana, convirtiendo
                               los valores a COP o USD segun @Moneda y la TRM
                               de cada semana.
     - Agrupado              : agrupa por CashflowCategoryId y semana.
@@ -83,8 +84,8 @@ RETURN
             ) AS Valor
         FROM TRMSemana t
         INNER JOIN TRADE tr
-            ON COALESCE(tr.FechaCobro, tr.FECING) >= t.LunesSemana
-           AND COALESCE(tr.FechaCobro, tr.FECING) <  DATEADD(DAY, 7, t.LunesSemana)
+            ON COALESCE(tr.FechaCobro, tr.FECHA1) >= t.LunesSemana
+           AND COALESCE(tr.FechaCobro, tr.FECHA1) <  DATEADD(DAY, 7, t.LunesSemana)
            AND tr.ORIGEN = 'FAC'
         INNER JOIN MTPROCLI p
             ON p.NIT = tr.NIT

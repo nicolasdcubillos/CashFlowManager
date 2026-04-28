@@ -29,6 +29,8 @@ GO
     - CashflowDataEgresos
     - CashflowDataFlujoEconomico
     - CashflowDataProjection
+    - CashflowDataProjectionManual
+    - CashflowDataProjectionPedidos
 
   Todas las funciones deben retornar las columnas:
     Concepto  NVARCHAR / VARCHAR
@@ -65,7 +67,9 @@ BEGIN
         'CashflowDataIngresos',
         'CashflowDataEgresos',
         'CashflowDataFlujoEconomico',
-        'CashflowDataProjection'
+        'CashflowDataProjection',
+        'CashflowDataProjectionManual',
+        'CashflowDataProjectionPedidos'
     )
         THROW 50001, 'Funcion no reconocida. Verifique @FunctionName.', 1;
 
@@ -79,7 +83,9 @@ BEGIN
         THROW 50004, 'Categoria no valida. Use INGRESOS, EGRESOS o FINANCIAMIENTO.', 1;
 
     -- Calcular cuantas semanas hay en el rango y generar columnas [1],[2],...,[N]
-    DECLARE @NumSemanas INT = DATEDIFF(WEEK, @FechaInicial, @FechaFinal) + 1;
+    -- Usa DATEDIFF(DAY)/7 en vez de DATEDIFF(WEEK) para contar periodos de 7
+    -- dias reales y no cruces de frontera semanal (que da 1 de mas).
+    DECLARE @NumSemanas INT = DATEDIFF(DAY, @FechaInicial, @FechaFinal) / 7 + 1;
     DECLARE @Columnas   NVARCHAR(MAX);
     DECLARE @SQL        NVARCHAR(MAX);
     DECLARE @Where      NVARCHAR(100) = '';

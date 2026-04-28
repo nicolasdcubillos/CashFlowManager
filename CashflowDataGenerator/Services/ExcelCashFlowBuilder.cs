@@ -28,7 +28,7 @@ namespace CashflowDataGenerator.Services
             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
         };
 
-        private const string NumFmt = @"#,##0;-#,##0;""-""";
+        private const string NumFmt = "#.##0";
 
         private Excel.Application _app;
         private Excel.Workbook _libro;
@@ -86,8 +86,8 @@ namespace CashflowDataGenerator.Services
             ConstruirHoja(hojaCOP, "COP");
 
             // Guardar
-            Report($"Guardando {nombreArchivo}...");
-            _libro.SaveAs(ruta, Excel.XlFileFormat.xlOpenXMLWorkbook);
+            //Report($"Guardando {nombreArchivo}...");
+            //_libro.SaveAs(ruta, Excel.XlFileFormat.xlOpenXMLWorkbook);
             Report("Flujo de Caja generado exitosamente.");
 
             return ruta;
@@ -201,22 +201,104 @@ namespace CashflowDataGenerator.Services
             string fechaIni = _fechaInicial.ToString("yyyy-MM-dd");
             string fechaFin = _fechaFinalRango.ToString("yyyy-MM-dd");
 
-            // Corte histórico: domingo de la semana actual
-            DateTime fechaFinHist = _fechaInicial.AddDays(_semanasAtras * 7 + 6);
-            string fechaIniHist = fechaIni;
-            string fechaFinHist_s = fechaFinHist.ToString("yyyy-MM-dd");
-
-            // Proyección: lunes siguiente a la semana actual
-            DateTime fechaIniProy = _fechaInicial.AddDays((_semanasAtras + 1) * 7);
-            string fechaIniProy_s = fechaIniProy.ToString("yyyy-MM-dd");
-            string fechaFinProy_s = fechaFin;
-
+            // Columna donde empieza la proyección (semanas futuras)
             int colProy = 3 + _semanasAtras + 1;
 
-            // ── 1) Header financiero ────────────────────────────────
-            Report($"Dibujando header financiero {moneda}...");
-            int fila = DibujarSeccionPivot(hoja, 8, "CashflowDataHeader",
-                fechaIniHist, fechaFinHist_s, moneda, label: null);
+            // Rango solo-proyección: lunes de la primera semana futura → fin
+            DateTime fechaIniProy = _fechaInicial.AddDays((_semanasAtras + 1) * 7);
+            string fechaIniProy_s = fechaIniProy.ToString("yyyy-MM-dd");
+
+            // ── 1) Header financiero (labels hard-coded, sin consulta DB) ─
+            const int filaHdrCOP     = 8;
+            const int filaHdrUSD     = 9;
+            const int filaCredicorp  = 10;
+            const int filaDispBancos = 11;
+            int fila = 12;
+
+            // Última columna de datos = col 3 + semanas pasadas + semanas futuras
+            int ultimaColHdr = 3 + _semanasAtras + _semanasAdelante;
+
+            hoja.Cells[filaHdrCOP,     2] = "Saldo inicial COP";
+            hoja.Cells[filaHdrUSD,     2] = "Saldo inicial USD";
+            hoja.Cells[filaCredicorp,  2] = "PA Credicorp - Excedentes";
+            hoja.Cells[filaDispBancos, 2] = "Disponible Bancos";
+
+            // Estilo filas de datos del header (igual que DibujarDataTable: color alterno + bordes + NumFmt en rango)
+            foreach (int r in new[] { filaHdrCOP, filaHdrUSD, filaCredicorp, filaDispBancos })
+            {
+                var rFila = hoja.Range[hoja.Cells[r, 2], hoja.Cells[r, ultimaColHdr]];
+                rFila.Interior.Color = ColorAlternar(r);
+                rFila.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+                rFila.Borders.Weight    = Excel.XlBorderWeight.xlThin;
+                hoja.Range[hoja.Cells[r, 3], hoja.Cells[r, ultimaColHdr]].NumberFormat = NumFmt;
+            }
+
+            // Disponible Bancos = Saldo inicial COP + Saldo inicial USD + PA Credicorp - Excedentes
+            for (int c = 3; c <= ultimaColHdr; c++)
+            {
+                string cl = ColumnaLetra(c);
+                ((Excel.Range)hoja.Cells[filaDispBancos, c]).Formula =
+                    $"={cl}{filaHdrCOP}+{cl}{filaHdrUSD}+{cl}{filaCredicorp}";
+                ((Excel.Range)hoja.Cells[filaDispBancos, c]).NumberFormat = NumFmt;
+            }
+
+            if (moneda == "USD")
+            {
+                // Row 9: USD bank balance — DB call per week (lunes - 1 día)
+                Report("Cargando Saldo inicial USD (banco)...");
+                for (int c = 3; c <= ultimaColHdr; c++)
+                {
+                    DateTime weekDate = _fechaInicial.AddDays((c - 3) * 7);
+                    decimal usd = CashFlowRepository.GetBankBalanceTotal(weekDate.AddDays(-1), "USD");
+                    hoja.Cells[filaHdrUSD, c] = (double)usd;
+                    ((Excel.Range)hoja.Cells[filaHdrUSD, c]).NumberFormat = NumFmt;
+                }
+
+                // Row 8, col 3: COP bank balance ÷ TRM → expresado en USD
+                Report("Cargando Saldo inicial COP (semana 1, en USD)...");
+                decimal copRaw = CashFlowRepository.GetBankBalanceTotal(_fechaInicial.AddDays(-1), "COP");
+                decimal trm1   = CashFlowRepository.GetTRM(_fechaInicial);
+                hoja.Cells[filaHdrCOP, 3] = trm1 > 0 ? (double)(copRaw / trm1) : 0.0;
+                ((Excel.Range)hoja.Cells[filaHdrCOP, 3]).NumberFormat = NumFmt;
+
+                // Row 10, col 3: PA Credicorp - Excedentes ÷ TRM → expresado en USD (solo semana 1)
+                Report("Cargando PA Credicorp - Excedentes (semana 1, en USD)...");
+                decimal pcaRaw = CashFlowRepository.GetBankBalanceTotal(_fechaInicial.AddDays(-1), "PCA");
+                hoja.Cells[filaCredicorp, 3] = trm1 > 0 ? (double)(pcaRaw / trm1) : 0.0;
+                ((Excel.Range)hoja.Cells[filaCredicorp, 3]).NumberFormat = NumFmt;
+                for (int c = 4; c <= ultimaColHdr; c++)
+                {
+                    hoja.Cells[filaCredicorp, c] = 0;
+                    ((Excel.Range)hoja.Cells[filaCredicorp, c]).NumberFormat = NumFmt;
+                }
+            }
+            else // COP: todo se deriva de la hoja USD — cero llamadas a BD
+            {
+                // Row 9: USD balance × TRM → COP
+                // Row 8, col 3: (COP/TRM) × TRM → COP  (invierte la conversión de la hoja USD)
+                Report("Aplicando fórmulas de saldo de bancos desde hoja USD...");
+                for (int c = 3; c <= ultimaColHdr; c++)
+                {
+                    string cl = ColumnaLetra(c);
+                    ((Excel.Range)hoja.Cells[filaHdrUSD, c]).Formula =
+                        $"='CF I Q-AJUSTADO USD'!{cl}{filaHdrUSD}*'CF I Q-AJUSTADO USD'!{cl}3";
+                    ((Excel.Range)hoja.Cells[filaHdrUSD, c]).NumberFormat = NumFmt;
+                }
+                string c3 = ColumnaLetra(3);
+                ((Excel.Range)hoja.Cells[filaHdrCOP, 3]).Formula =
+                    $"='CF I Q-AJUSTADO USD'!{c3}{filaHdrCOP}*'CF I Q-AJUSTADO USD'!{c3}3";
+                ((Excel.Range)hoja.Cells[filaHdrCOP, 3]).NumberFormat = NumFmt;
+
+                // Row 10, col 3: PA Credicorp - Excedentes — invierte TRM desde hoja USD
+                ((Excel.Range)hoja.Cells[filaCredicorp, 3]).Formula =
+                    $"='CF I Q-AJUSTADO USD'!{c3}{filaCredicorp}*'CF I Q-AJUSTADO USD'!{c3}3";
+                ((Excel.Range)hoja.Cells[filaCredicorp, 3]).NumberFormat = NumFmt;
+                for (int c = 4; c <= ultimaColHdr; c++)
+                {
+                    hoja.Cells[filaCredicorp, c] = 0;
+                    ((Excel.Range)hoja.Cells[filaCredicorp, c]).NumberFormat = NumFmt;
+                }
+            }
 
             // ── 2) Ingresos ─────────────────────────────────────────
             Report($"Consultando Ingresos {moneda}...");
@@ -224,11 +306,11 @@ namespace CashflowDataGenerator.Services
             int filaInicioIng = fila;
 
             fila = DibujarSeccionPivot(hoja, fila, "CashflowDataIngresos",
-                fechaIniHist, fechaFinHist_s, moneda, label: null);
+                fechaIni, fechaFin, moneda, label: null);
 
             if (_semanasAdelante > 0)
-                DibujarProyeccion(hoja, filaInicioIng, colProy,
-                    "CashflowDataProjection", fechaIniProy_s, fechaFinProy_s, moneda, "INGRESOS");
+                SumarProyeccion(hoja, filaInicioIng, colProy,
+                    "CashflowDataProjection", fechaIniProy_s, fechaFin, moneda, "INGRESOS");
 
             int filaFinIng = fila - 1;
             fila = DibujarSubtotal(hoja, filaInicioIng, filaFinIng, fila, "Total ingresos");
@@ -240,11 +322,11 @@ namespace CashflowDataGenerator.Services
             int filaInicioEgr = fila;
 
             fila = DibujarSeccionPivot(hoja, fila, "CashflowDataEgresos",
-                fechaIniHist, fechaFinHist_s, moneda, label: null);
+                fechaIni, fechaFin, moneda, label: null);
 
             if (_semanasAdelante > 0)
-                DibujarProyeccion(hoja, filaInicioEgr, colProy,
-                    "CashflowDataProjection", fechaIniProy_s, fechaFinProy_s, moneda, "EGRESOS");
+                SumarProyeccion(hoja, filaInicioEgr, colProy,
+                    "CashflowDataProjection", fechaIniProy_s, fechaFin, moneda, "EGRESOS");
 
             int filaFinEgr = fila - 1;
             fila = DibujarSubtotal(hoja, filaInicioEgr, filaFinEgr, fila, "Total egresos");
@@ -256,11 +338,11 @@ namespace CashflowDataGenerator.Services
             int filaInicioFE = fila;
 
             fila = DibujarSeccionPivot(hoja, fila, "CashflowDataFlujoEconomico",
-                fechaIniHist, fechaFinHist_s, moneda, label: null);
+                fechaIni, fechaFin, moneda, label: null);
 
             if (_semanasAdelante > 0)
-                DibujarProyeccion(hoja, filaInicioFE, colProy,
-                    "CashflowDataProjection", fechaIniProy_s, fechaFinProy_s, moneda, "FINANCIAMIENTO");
+                SumarProyeccion(hoja, filaInicioFE, colProy,
+                    "CashflowDataProjection", fechaIniProy_s, fechaFin, moneda, "FINANCIAMIENTO");
 
             int filaFinFE = fila - 1;
             fila = DibujarSubtotal(hoja, filaInicioFE, filaFinFE, fila, "Total Financiamiento");
@@ -268,12 +350,23 @@ namespace CashflowDataGenerator.Services
 
             // ── 5) Flujo de Caja Financiero (fila en 0) ────────────
             int ultimaColData = GetUltimaColumna(hoja, fila - 1);
+            int filaFCF = fila;
             fila = DibujarFlujoCajaFinanciero(hoja, fila, ultimaColData);
             fila += 2;
 
+            // Saldo inicial COP cols 4+: = FCF[col anterior] - USD[col actual]
+            for (int c = 4; c <= ultimaColHdr; c++)
+            {
+                string prevCol = ColumnaLetra(c - 1);
+                string currCol = ColumnaLetra(c);
+                ((Excel.Range)hoja.Cells[filaHdrCOP, c]).Formula =
+                    $"={prevCol}{filaFCF}-{currCol}{filaHdrUSD}";
+                ((Excel.Range)hoja.Cells[filaHdrCOP, c]).NumberFormat = NumFmt;
+            }
+
             // ── 6) Totales ──────────────────────────────────────────
             Report($"Dibujando Totales {moneda}...");
-            DibujarTotales(hoja, fila, ultimaColData);
+            DibujarTotales(hoja, fila, ultimaColData, filaHdrCOP, filaHdrUSD);
 
             // AutoFit columna B
             ((Excel.Range)hoja.Columns[2]).AutoFit();
@@ -323,7 +416,7 @@ namespace CashflowDataGenerator.Services
                 {
                     if (dc.ColumnName.Equals("ItemOrder", StringComparison.OrdinalIgnoreCase))
                         continue;
-                    hoja.Cells[fila, excelCol] = row[dc] == DBNull.Value ? 0 : row[dc];
+                    hoja.Cells[fila, excelCol] = row[dc] == DBNull.Value ? (object)0 : row[dc];
                     excelCol++;
                 }
 
@@ -344,9 +437,9 @@ namespace CashflowDataGenerator.Services
         }
 
         /// <summary>
-        /// Dibuja proyección sobre filas existentes (solo valores, sin concepto).
+        /// Suma valores de proyección sobre las celdas existentes (no sobreescribe).
         /// </summary>
-        private void DibujarProyeccion(Excel.Worksheet hoja, int filaInicio, int colInicio,
+        private void SumarProyeccion(Excel.Worksheet hoja, int filaInicio, int colInicio,
             string functionName, string fechaIni, string fechaFin,
             string moneda, string category)
         {
@@ -363,7 +456,18 @@ namespace CashflowDataGenerator.Services
                     string name = dc.ColumnName.ToUpperInvariant();
                     if (name == "CONCEPTO" || name == "ITEMORDER")
                         continue;
-                    hoja.Cells[filaActual, excelCol] = row[dc] == DBNull.Value ? 0 : row[dc];
+
+                    decimal valorProy = row[dc] == DBNull.Value ? 0m
+                        : Convert.ToDecimal(row[dc]);
+
+                    if (valorProy != 0m)
+                    {
+                        object existing = ((Excel.Range)hoja.Cells[filaActual, excelCol]).Value2;
+                        decimal valorExist = existing == null ? 0m
+                            : Convert.ToDecimal(existing);
+                        hoja.Cells[filaActual, excelCol] = (double)(valorExist + valorProy);
+                    }
+
                     excelCol++;
                 }
 
@@ -418,8 +522,10 @@ namespace CashflowDataGenerator.Services
 
                 ((Excel.Range)hoja.Cells[filaSubtotal, c]).Formula = formula;
                 ((Excel.Range)hoja.Cells[filaSubtotal, c]).Font.Bold = true;
-                ((Excel.Range)hoja.Cells[filaSubtotal, c]).NumberFormat = NumFmt;
             }
+
+            hoja.Range[hoja.Cells[filaSubtotal, 3], hoja.Cells[filaSubtotal, ultimaCol]]
+                .NumberFormat = NumFmt;
 
             var rBorde = hoja.Range[hoja.Cells[filaSubtotal, 2], hoja.Cells[filaSubtotal, ultimaCol]];
             rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
@@ -441,9 +547,11 @@ namespace CashflowDataGenerator.Services
             for (int c = 3; c <= ultimaCol; c++)
             {
                 hoja.Cells[fila, c] = 0;
-                ((Excel.Range)hoja.Cells[fila, c]).NumberFormat = NumFmt;
                 ((Excel.Range)hoja.Cells[fila, c]).Font.Bold = true;
             }
+
+            hoja.Range[hoja.Cells[fila, 3], hoja.Cells[fila, ultimaCol]]
+                .NumberFormat = NumFmt;
 
             var rBorde = hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, ultimaCol]];
             rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
@@ -454,8 +562,11 @@ namespace CashflowDataGenerator.Services
 
         /// <summary>
         /// Sección de totales: 7 conceptos fijos con color #D7D3DA.
+        /// "Disponible Bancos" = fórmula: Saldo inicial COP + Saldo inicial USD
+        /// referenciando las filas del header (filaHdrCOP y filaHdrUSD).
         /// </summary>
-        private void DibujarTotales(Excel.Worksheet hoja, int filaInicio, int ultimaCol)
+        private void DibujarTotales(Excel.Worksheet hoja, int filaInicio, int ultimaCol,
+            int filaHdrCOP, int filaHdrUSD)
         {
             string[] titulos =
             {
@@ -475,11 +586,23 @@ namespace CashflowDataGenerator.Services
                 hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, ultimaCol]]
                     .Interior.Color = ColorTotales;
 
+                bool esDisponible = t == "Disponible Bancos";
+
                 for (int c = 3; c <= ultimaCol; c++)
                 {
-                    hoja.Cells[fila, c] = 0;
-                    ((Excel.Range)hoja.Cells[fila, c]).NumberFormat = NumFmt;
+                    if (esDisponible)
+                    {
+                        // = Saldo inicial COP[col] + Saldo inicial USD[col] + PA Credicorp Excedentes[col]
+                        string col = ColumnaLetra(c);
+                        ((Excel.Range)hoja.Cells[fila, c]).Formula =
+                            $"={col}{filaHdrCOP}+{col}{filaHdrUSD}+{col}{filaHdrCOP + 2}";
+                    }
+                    else
+                        hoja.Cells[fila, c] = 0;
                 }
+
+                hoja.Range[hoja.Cells[fila, 3], hoja.Cells[fila, ultimaCol]]
+                    .NumberFormat = NumFmt;
 
                 var rBorde = hoja.Range[hoja.Cells[fila, 2], hoja.Cells[fila, ultimaCol]];
                 rBorde.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
@@ -488,6 +611,8 @@ namespace CashflowDataGenerator.Services
                 fila++;
             }
         }
+
+
 
         // ═════════════════════════════════════════════════════════════
         //  UTILIDADES

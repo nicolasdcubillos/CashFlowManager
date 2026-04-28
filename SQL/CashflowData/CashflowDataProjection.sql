@@ -4,39 +4,62 @@ GO
 /*
 ================================================================================
   Archivo      : CashflowDataProjection.sql
-  Descripcion  : Valores proyectados (manuales) del flujo de caja por semana.
-                 Lee la tabla CashflowProjection, clasifica cada NIT a traves
-                 de MTPROCLI.CashflowCategoryId y agrupa por categoria.
-                 Retorna TODAS las categorias (INGRESOS, EGRESOS,
-                 FINANCIAMIENTO) en una sola consulta; filtrar con @Category
-                 en CashflowPivot al invocar.
+  Descripcion  : Proyeccion COMBINADA del flujo de caja por semana.
+                 Suma los resultados de dos fuentes independientes:
+                   1) CashflowDataProjectionManual  → entrada manual via UI
+                      (tabla CashflowProjection).
+                   2) CashflowDataProjectionPedidos  → pedidos pendientes
+                      de despacho (tabla PedidosPendientes, Puntoventa=0).
+                 Cada fuente tiene su propia TVF que puede ejecutarse por
+                 separado via CashflowPivot para troubleshooting.
   Autor        : CC Sistemas
-  Fecha        : 2026-03-26
+  Fecha        : 2026-04-12
 ================================================================================
+
+  SINONIMO  dbo.PedidosPendientes_Src
+  ------------------------------------
+  Abstrae la base de datos donde reside PedidosPendientes.
+  Para apuntar a otra DB, ejecutar:
+      DROP   SYNONYM dbo.PedidosPendientes_Src;
+      CREATE SYNONYM dbo.PedidosPendientes_Src
+             FOR [NuevaBaseDeDatos].[dbo].[PedidosPendientes];
 
   FUNCION  dbo.CashflowDataProjection (@FechaInicial, @FechaFinal, @Moneda)
   ---------------------------------------------------------------------------
-  Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto x
-  semana del rango indicado. Internamente construye:
-    - Semanas               : genera semanas (lunes a domingo) desde
-                              @FechaInicial hasta @FechaFinal.
-    - SemanaISO             : convierte cada fecha a (ISOYear, ISOWeek) para
-                              cruzar contra CashflowProjection.
-    - TRMSemana             : TRM vigente para conversion a USD.
-    - ProyeccionAgrupada    : suma TotalProjected por CashflowCategoryId.
+  Tabla-funcion (RETURNS TABLE) que combina ambas proyecciones.
+  Invoca las dos TVFs hijas y suma los valores por (Category, Concepto,
+  ItemOrder, Semana).
 
   Columnas de salida:
     Category   VARCHAR(20)    - INGRESOS / EGRESOS / FINANCIAMIENTO
     Concepto   VARCHAR(150)   - ParentName de CashflowCategory
-    ItemOrder  INT            - para ordenar filas dentro de la seccion
+    ItemOrder  INT            - orden de filas dentro de la seccion
     Semana     INT            - semana secuencial (1, 2, 3 ...)
-    Valor      DECIMAL(18,2)  - monto proyectado (0 si no hay datos)
+    Valor      DECIMAL(18,2)  - suma de manual + pedidos (0 si ninguna tiene datos)
 
   PIVOT: usar dbo.CashflowPivot con @FunctionName = 'CashflowDataProjection'
          y @Category = 'INGRESOS' | 'EGRESOS' | 'FINANCIAMIENTO'.
+
+  Para diagnostico individual:
+    EXEC dbo.CashflowPivot 'CashflowDataProjectionManual',  ... , 'INGRESOS';
+    EXEC dbo.CashflowPivot 'CashflowDataProjectionPedidos', ... , 'INGRESOS';
 ================================================================================
 */
 
+-- ============================================================
+-- Sinonimo: un solo lugar para cambiar la DB fuente
+-- ============================================================
+IF OBJECT_ID('dbo.PedidosPendientes_Src', 'SN') IS NOT NULL
+    DROP SYNONYM dbo.PedidosPendientes_Src;
+GO
+
+CREATE SYNONYM dbo.PedidosPendientes_Src
+    FOR [INTECPL].[dbo].[PedidosPendientes];
+GO
+
+-- ============================================================
+-- Funcion TVF combinada: Manual + Pedidos
+-- ============================================================
 CREATE OR ALTER FUNCTION dbo.CashflowDataProjection
 (
     @FechaInicial DATE,
@@ -47,77 +70,22 @@ RETURNS TABLE
 AS
 RETURN
 (
-    WITH Semanas AS
-    (
-        SELECT
-            1 AS Semana,
-            @FechaInicial AS LunesSemana
-        UNION ALL
-        SELECT
-            Semana + 1,
-            DATEADD(WEEK, 1, LunesSemana)
-        FROM Semanas
-        WHERE DATEADD(WEEK, 1, LunesSemana) <= @FechaFinal
-    ),
-
-    SemanaISO AS
-    (
-        SELECT
-            Semana,
-            LunesSemana,
-            -- ISO year: ano al que pertenece la ISO week
-            YEAR(DATEADD(DAY, 26 - DATEPART(ISO_WEEK, LunesSemana), LunesSemana)) AS ISOYear,
-            DATEPART(ISO_WEEK, LunesSemana) AS ISOWeek
-        FROM Semanas
-    ),
-
-    TRMSemana AS
-    (
-        SELECT
-            s.Semana,
-            ISNULL((
-                SELECT TOP 1 VALOR
-                FROM MTCAMBIO c
-                WHERE c.FECHA <= s.LunesSemana
-                ORDER BY c.FECHA DESC
-            ), 1) AS TRM
-        FROM SemanaISO s
-    ),
-
-    ProyeccionAgrupada AS
-    (
-        SELECT
-            s.Semana,
-            p.CashflowCategoryId,
-            SUM(
-                CASE
-                    WHEN @Moneda = 'USD'
-                        THEN cp.TotalProjected / NULLIF(t.TRM, 0)
-                    ELSE cp.TotalProjected
-                END
-            ) AS Valor
-        FROM SemanaISO s
-        INNER JOIN CashflowProjection cp
-            ON cp.[Year] = s.ISOYear
-           AND cp.Week   = s.ISOWeek
-        INNER JOIN MTPROCLI p
-            ON p.NIT = cp.NIT
-        INNER JOIN TRMSemana t
-            ON t.Semana = s.Semana
-        WHERE p.CashflowCategoryId IS NOT NULL
-        GROUP BY s.Semana, p.CashflowCategoryId
-    )
-
     SELECT
-        cat.Category,
-        cat.ParentName   AS Concepto,
-        cat.ItemOrder,
-        s.Semana,
-        ISNULL(pa.Valor, 0) AS Valor
-    FROM dbo.CashflowCategory cat
-    CROSS JOIN Semanas s
-    LEFT JOIN ProyeccionAgrupada pa
-        ON pa.CashflowCategoryId = cat.Id
-       AND pa.Semana = s.Semana
+        Category,
+        Concepto,
+        ItemOrder,
+        Semana,
+        SUM(Valor) AS Valor
+    FROM
+    (
+        SELECT Category, Concepto, ItemOrder, Semana, Valor
+        FROM   dbo.CashflowDataProjectionManual(@FechaInicial, @FechaFinal, @Moneda)
+
+        UNION ALL
+
+        SELECT Category, Concepto, ItemOrder, Semana, Valor
+        FROM   dbo.CashflowDataProjectionPedidos(@FechaInicial, @FechaFinal, @Moneda)
+    ) AS combined
+    GROUP BY Category, Concepto, ItemOrder, Semana
 );
 GO

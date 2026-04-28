@@ -1,9 +1,10 @@
 -- ===========================================================
---  CashFlowManager - DDL de tablas de configuracion
+--  CashFlowManager - Setup centralizado
 --  Autor: Nicolas David Cubillos
 --  Descripcion:
---    Crea la tabla CashflowManagerConfig si no existe y la
---    inicializa con los valores por defecto de semanas.
+--    Script único de despliegue: crea tablas, aplica ALTERs
+--    y define funciones del módulo CashFlowManager.
+--    Idempotente: puede ejecutarse múltiples veces sin error.
 -- ===========================================================
 
 USE INTECPL;
@@ -164,3 +165,69 @@ BEGIN
     INSERT INTO dbo.CashflowManagerConfig (Config, Value)
     VALUES ('ORIGEN', 'FAC');
 END
+
+-- ===========================================================
+--  Tabla: CashflowBankClassification
+--  Catálogo de clasificación de moneda para cuentas bancarias.
+-- ===========================================================
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM   INFORMATION_SCHEMA.TABLES
+    WHERE  TABLE_SCHEMA = 'dbo'
+      AND  TABLE_NAME   = 'CashflowBankClassification'
+)
+BEGIN
+    CREATE TABLE dbo.CashflowBankClassification (
+        Id          VARCHAR(3)    NOT NULL,
+        Descripcion NVARCHAR(100) NOT NULL,
+        ItemOrder   TINYINT       NOT NULL DEFAULT 0,
+        CONSTRAINT PK_CashflowBankClassification PRIMARY KEY (Id)
+    );
+
+    INSERT INTO dbo.CashflowBankClassification (Id, Descripcion, ItemOrder) VALUES
+        ('COP', 'Pesos Colombianos', 1),
+        ('USD', 'Dólares Americanos', 2),
+        ('PCA', 'PA Credicorp - Excedentes', 3);
+END
+
+-- Idempotente: agrega PCA si la tabla ya existía antes de este script
+IF NOT EXISTS (SELECT 1 FROM dbo.CashflowBankClassification WHERE Id = 'PCA')
+    INSERT INTO dbo.CashflowBankClassification (Id, Descripcion, ItemOrder)
+    VALUES ('PCA', 'PA Credicorp - Excedentes', 3);
+
+-- ===========================================================
+--  ALTER: MTBANCOS — agregar referencia a CashflowBankClassification
+--  Agrega CashflowBankClassificationId (nullable) como FK a
+--  CashflowBankClassification.Id para indicar la moneda de
+--  cada cuenta bancaria en el flujo de caja.
+-- ===========================================================
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM   INFORMATION_SCHEMA.COLUMNS
+    WHERE  TABLE_SCHEMA = 'dbo'
+      AND  TABLE_NAME   = 'MTBANCOS'
+      AND  COLUMN_NAME  = 'CashflowBankClassificationId'
+)
+BEGIN
+    ALTER TABLE dbo.MTBANCOS
+        ADD CashflowBankClassificationId VARCHAR(3) NULL;
+
+    ALTER TABLE dbo.MTBANCOS
+        ADD CONSTRAINT FK_MTBANCOS_CashflowBankClassification
+            FOREIGN KEY (CashflowBankClassificationId)
+            REFERENCES dbo.CashflowBankClassification (Id);
+END
+GO
+
+-- Nota: la consulta de saldo bancario por moneda reutiliza la función
+-- legacy dbo.fnvOF_ReporteMVBancos_Saldos filtrando por
+-- MTBANCOS.CashflowBankClassificationId. Ver CashFlowRepository.GetBankBalanceTotal.
+--
+-- Uso de referencia:
+--   SELECT SUM(s.Saldo_Final)
+--   FROM dbo.fnvOF_ReporteMVBancos_Saldos('2026-04-25', '2026-04-25') s
+--   INNER JOIN dbo.MTBANCOS b ON RTRIM(b.CODIGOCTA) = RTRIM(s.Banco)
+--   WHERE b.CashflowBankClassificationId = 'COP'  -- o 'USD'
+GO

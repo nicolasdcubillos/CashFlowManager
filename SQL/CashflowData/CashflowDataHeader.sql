@@ -4,10 +4,9 @@ GO
 /*
 ================================================================================
   Archivo      : CashflowDataHeader.sql
-  Descripcion  : Saldos bancarios iniciales y disponibilidad de caja por
-                 semana para el encabezado del flujo de caja.
-                 Incluye saldo COP, saldo USD convertido, prestamos y
-                 total disponible en bancos.
+  Descripcion  : Saldo bancario inicial por semana para el encabezado
+                 del flujo de caja. Cuentas COP y USD desde MVBANCOS/
+                 MTBANCOS; cuentas de excedentes Credicorp separadas.
   Autor        : CC Sistemas
   Fecha        : 2026-03-26
 ================================================================================
@@ -16,16 +15,22 @@ GO
   -----------------------------------------------------------------------
   Tabla-funcion (RETURNS TABLE) que genera una fila por cada concepto de
   saldo y por cada semana del rango indicado. Internamente construye:
-    - Semanas               : genera semanas (lunes a domingo) desde
-                              @FechaInicial hasta @FechaFinal.
-    - TRM                   : consulta la tasa de cambio vigente en MTCAMBIO
-                              para la fecha de inicio de cada semana.
-    - Saldos                : invoca fnvOF_ReporteMVBancos_Saldos por semana
-                              (lunes a domingo) y agrupa Saldo_Final separando
-                              COP y USD segun Otra_Moneda. Convierte segun
-                              @Moneda usando la TRM de cada semana.
-  Retorna cuatro conceptos: Saldo inicial COP, Saldo inicial USD,
-  PA Credicorp - Excedentes y Disponible Bancos.
+    - Semanas       : genera semanas (lunes a domingo) desde
+                      @FechaInicial hasta @FechaFinal.
+    - TRM           : consulta la tasa de cambio vigente en MTCAMBIO
+                      para la fecha de inicio de cada semana.
+    - SaldoBancos   : cuentas regulares (excedentes excluidas). Calcula
+                      SaldoCOP (OTRAMON='N') y SaldoUSD (OTRAMON='S')
+                      como SALINICIAL + movimientos acumulados hasta
+                      el lunes de cada semana.
+    - Excedentes    : cuentas Credicorp identificadas por CODIGOCTA
+                      especificos (ver TODO en el CTE). Saldo en COP.
+                      Nota: MVBANCOS.VALOR se asume firmado.
+  Retorna cuatro conceptos:
+    1. Saldo inicial COP     (OTRAMON='N', cuentas en pesos)
+    2. Saldo inicial USD     (OTRAMON='S', cuentas en otra moneda)
+    3. PA Credicorp - Excedentes (CODIGOCTA fijo, cuentas prestamos)
+    4. Disponible Bancos     (COP + USD*TRM + Excedentes)
 
   PIVOT: usar dbo.CashflowPivot con @FunctionName = 'CashflowDataHeader'.
 ================================================================================
@@ -68,80 +73,121 @@ RETURN
         FROM Semanas s
     ),
 
-    Saldos AS
+    SaldoBancos AS
     (
-        SELECT 
+        -- Cuentas regulares (no excedentes): separa COP y USD.
+        -- SaldoCOP: cuentas OTRAMON='N' (pesos).
+        -- SaldoUSD: cuentas OTRAMON='S' (dolares), en unidades USD.
+        -- El saldo = SALINICIAL configurado + movimientos hasta LunesSemana.
+        SELECT
             s.Semana,
             t.TRM,
-
-            -- Pesos y MultiMoneda tienen otramon='N' => COP; OtraMoneda tiene otramon='S' => USD
-            SUM(CASE WHEN fn.Tipo_Moneda IN ('Pesos', 'MultiMoneda') THEN fn.Saldo_Final ELSE 0 END) AS SaldoCOP,
-            SUM(CASE WHEN fn.Tipo_Moneda = 'OtraMoneda'              THEN fn.Saldo_Final ELSE 0 END) AS SaldoUSD,
-
-            -- Prestamos separados por moneda para conversion limpia
-            SUM(CASE WHEN fn.Banco IN ('CTA_PRESTAMO_1','CTA_PRESTAMO_2')
-                          AND fn.Tipo_Moneda IN ('Pesos', 'MultiMoneda')
-                     THEN fn.Saldo_Final ELSE 0 END) AS PrestamosCOP,
-            SUM(CASE WHEN fn.Banco IN ('CTA_PRESTAMO_1','CTA_PRESTAMO_2')
-                          AND fn.Tipo_Moneda = 'OtraMoneda'
-                     THEN fn.Saldo_Final ELSE 0 END) AS PrestamosUSD
-
+            SUM(CASE WHEN RTRIM(b.OTRAMON) = 'N'
+                     THEN ISNULL(b.SALINICIAL, 0) + ISNULL(mv.TotalMov, 0)
+                     ELSE 0 END) AS SaldoCOP,
+            SUM(CASE WHEN RTRIM(b.OTRAMON) = 'S'
+                     THEN ISNULL(b.SALINICIAL, 0) + ISNULL(mv.TotalMov, 0)
+                     ELSE 0 END) AS SaldoUSD
         FROM Semanas s
 
-        LEFT JOIN TRM t ON t.Semana = s.Semana
+        INNER JOIN TRM t ON t.Semana = s.Semana
 
-        CROSS APPLY dbo.fnvOF_ReporteMVBancos_Saldos(
-            s.LunesSemana,
-            DATEADD(DAY, 6, s.LunesSemana)
-        ) fn
+        CROSS JOIN MTBANCOS b
+
+        OUTER APPLY (
+            SELECT SUM(mv.VALOR) AS TotalMov
+            FROM MVBANCOS mv
+            WHERE mv.CODIGOCTA = b.CODIGOCTA
+              AND CAST(mv.FECHA AS DATE) <= s.LunesSemana
+        ) mv
+
+        -- TODO: excluir los CODIGOCTA de cuentas Credicorp excedentes
+        WHERE b.CODIGOCTA NOT IN (
+            'TODO_CREDICORP_1',
+            'TODO_CREDICORP_2'
+        )
+
+        GROUP BY s.Semana, t.TRM
+    ),
+
+    Excedentes AS
+    (
+        -- Cuentas PA Credicorp - Excedentes identificadas por CODIGOCTA fijo.
+        -- TODO: reemplazar los valores con los CODIGOCTA reales.
+        SELECT
+            s.Semana,
+            t.TRM,
+            SUM(
+                ISNULL(b.SALINICIAL, 0)
+                + ISNULL(mv.TotalMov, 0)
+            ) AS SaldoExcedentes
+        FROM Semanas s
+
+        INNER JOIN TRM t ON t.Semana = s.Semana
+
+        CROSS JOIN MTBANCOS b
+
+        OUTER APPLY (
+            SELECT SUM(mv.VALOR) AS TotalMov
+            FROM MVBANCOS mv
+            WHERE mv.CODIGOCTA = b.CODIGOCTA
+              AND CAST(mv.FECHA AS DATE) <= s.LunesSemana
+        ) mv
+
+        WHERE b.CODIGOCTA IN (
+            'TODO_CREDICORP_1',
+            'TODO_CREDICORP_2'
+        )
 
         GROUP BY s.Semana, t.TRM
     )
 
-    -- Saldo COP: si piden USD se divide por TRM
+    -- 1. Saldo inicial COP (cuentas en pesos, OTRAMON='N')
     SELECT 'Saldo inicial COP' AS Concepto,
            1                   AS ItemOrder,
-           Semana,
+           sb.Semana,
            CASE WHEN @Moneda = 'USD'
-                THEN SaldoCOP / NULLIF(TRM, 0)
-                ELSE SaldoCOP
+                THEN sb.SaldoCOP / NULLIF(sb.TRM, 0)
+                ELSE sb.SaldoCOP
            END AS Valor
-    FROM Saldos
+    FROM SaldoBancos sb
 
     UNION ALL
 
-    -- Saldo USD: si piden COP se multiplica por TRM
+    -- 2. Saldo inicial USD (cuentas en otra moneda, OTRAMON='S')
     SELECT 'Saldo inicial USD',
            2,
-           Semana,
+           sb.Semana,
            CASE WHEN @Moneda = 'USD'
-                THEN SaldoUSD
-                ELSE SaldoUSD * TRM
+                THEN sb.SaldoUSD
+                ELSE sb.SaldoUSD * sb.TRM
            END
-    FROM Saldos
+    FROM SaldoBancos sb
 
     UNION ALL
 
-    -- Prestamos: conversion limpia separando COP y USD
+    -- 3. PA Credicorp - Excedentes
     SELECT 'PA Credicorp - Excedentes',
            3,
-           Semana,
+           e.Semana,
            CASE WHEN @Moneda = 'USD'
-                THEN PrestamosCOP / NULLIF(TRM, 0) + PrestamosUSD
-                ELSE PrestamosCOP + PrestamosUSD * TRM
+                THEN e.SaldoExcedentes / NULLIF(e.TRM, 0)
+                ELSE e.SaldoExcedentes
            END
-    FROM Saldos
+    FROM Excedentes e
 
     UNION ALL
 
-    -- Disponible total: suma homogenea en la moneda pedida
+    -- 4. Disponible Bancos = COP + USD*TRM + Excedentes (todo en moneda solicitada)
     SELECT 'Disponible Bancos',
            4,
-           Semana,
+           sb.Semana,
            CASE WHEN @Moneda = 'USD'
-                THEN SaldoCOP / NULLIF(TRM, 0) + SaldoUSD
-                ELSE SaldoCOP + (SaldoUSD * TRM)
+                THEN (sb.SaldoCOP + sb.SaldoUSD * sb.TRM + ISNULL(e.SaldoExcedentes, 0))
+                     / NULLIF(sb.TRM, 0)
+                ELSE sb.SaldoCOP + sb.SaldoUSD * sb.TRM + ISNULL(e.SaldoExcedentes, 0)
            END
-    FROM Saldos
+    FROM SaldoBancos sb
+    LEFT JOIN Excedentes e ON e.Semana = sb.Semana
 )
 GO
